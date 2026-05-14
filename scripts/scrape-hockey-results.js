@@ -104,17 +104,24 @@ async function main() {
 
       console.log(`📊 ${result.czechGoals}:${result.oppGoals} (${result.statusText || 'neznámý status'})`);
 
-      const newStatus = result.isFinished ? 'finished' : 'ongoing';
+      if (!result.isFinished) {
+        // Zápas ještě neskončil — pouze označ jako probíhající, NEukládej průběžné skóre
+        await supabase.from('matches').update({ status: 'ongoing' }).eq('id', match.id);
+        console.log(`🔄 Zápas ještě běží, čekáme na "konec"...`);
+        continue;
+      }
 
-      // Updatni zápas
+      // Zápas skončil ("konec") — uložit finální výsledek
       const { error: updateError } = await supabase
         .from('matches')
-        .update({ czech_goals: result.czechGoals, opponent_goals: result.oppGoals, status: newStatus })
+        .update({ czech_goals: result.czechGoals, opponent_goals: result.oppGoals, status: 'finished' })
         .eq('id', match.id);
 
       if (updateError) { console.error('Update error:', updateError); continue; }
 
-      // Pokud je zápas hotový, vypočítej body pro všechny tipy
+      console.log(`✅ Finální výsledek uložen: ${result.czechGoals}:${result.oppGoals}`);
+
+      // Vypočítej body pro všechny tipy
       if (result.isFinished) {
         const { data: preds } = await supabase
           .from('predictions')

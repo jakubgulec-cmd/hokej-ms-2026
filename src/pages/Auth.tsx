@@ -44,7 +44,7 @@ export default function Auth() {
         <div className="text-center mb-8">
           <div className="text-6xl mb-3">🏒</div>
           <h1 className="text-3xl font-bold tracking-tight">Hokej MS 2026</h1>
-          <p className="text-slate-400 mt-1">Tipovačka zápasů českého týmu</p>
+          <p className="text-slate-400 mt-1">Unipi tipovačka zápasů</p>
         </div>
 
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-8 shadow-2xl">

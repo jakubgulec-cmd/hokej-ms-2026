@@ -48,7 +48,7 @@ export default function Leaderboard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Výsledky a pravidla</h1>
+      <h1 className="text-2xl font-bold mb-6">Výsledky</h1>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
         <table className="w-full">
@@ -96,26 +96,6 @@ export default function Leaderboard() {
         </table>
       </div>
 
-      <div className="mt-6 bg-slate-800 border border-slate-700 rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-slate-400 mb-3">Bodování</h2>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span>Přesný tip (např. 4:2 → 4:2)</span>
-            <span className="text-yellow-400 font-bold">+3 body</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Správný výsledek (výhra / prohra)</span>
-            <span className="text-green-400 font-bold">+2 body</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Správný rozdíl (např. 4:2 → 6:4)</span>
-            <span className="text-blue-400 font-bold">+1 bod</span>
-          </div>
-        </div>
-        <p className="text-xs text-slate-500 mt-3">
-          V hokeji vždy jeden tým vyhraje (případně v prodloužení nebo nájezdech) — pravidla počítají s finálním výsledkem zápasu.
-        </p>
-      </div>
     </div>
   );
 }

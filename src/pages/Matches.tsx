@@ -30,10 +30,13 @@ const FLAG: Record<string, string> = {
   'Kanada': '🇨🇦',
 };
 
-function pointsLabel(points: number) {
-  if (points === 3) return { text: 'Přesný tip! +3 body', color: 'text-yellow-400' };
-  if (points === 2) return { text: 'Správný výsledek +2 body', color: 'text-green-400' };
-  if (points === 1) return { text: 'Správný rozdíl +1 bod', color: 'text-blue-400' };
+function getPointsLabel(pred: Prediction, match: Match) {
+  const p = pred.points;
+  const isExact = pred.czech_goals === match.czech_goals && pred.opponent_goals === match.opponent_goals;
+  if (isExact) return { text: 'Přesný tip! +3 body', color: 'text-yellow-400' };
+  if (p === 3) return { text: 'Správný výsledek + rozdíl +3 body', color: 'text-green-400' };
+  if (p === 2) return { text: 'Správný výsledek +2 body', color: 'text-green-400' };
+  if (p === 1) return { text: 'Správný rozdíl +1 bod', color: 'text-blue-400' };
   return { text: '0 bodů', color: 'text-slate-500' };
 }
 
@@ -185,8 +188,8 @@ export default function Matches() {
                         <p className="font-semibold">{pred.czech_goals} : {pred.opponent_goals}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`font-bold text-lg ${pointsLabel(pred.points).color}`}>
-                          {pointsLabel(pred.points).text}
+                        <p className={`font-bold text-lg ${getPointsLabel(pred, match).color}`}>
+                          {getPointsLabel(pred, match).text}
                         </p>
                       </div>
                     </div>

@@ -33,13 +33,11 @@ const COUNTRY_CODE: Record<string, string> = {
   'Švédsko-test': 'se',
 };
 
-function FlagImg({ code, size = 40 }: { code: string; size?: number }) {
+function Flag({ code }: { code: string }) {
   return (
-    <img
-      src={`https://flagcdn.com/w${size}/${code}.png`}
-      alt={code}
-      className="rounded shadow-sm"
-      style={{ width: size, height: size * 0.67, objectFit: 'cover' }}
+    <span
+      className={`fi fi-${code}`}
+      style={{ width: 48, height: 32, display: 'inline-block', borderRadius: 4 }}
     />
   );
 }
@@ -171,7 +169,7 @@ export default function Matches() {
               {/* Hlavička zápasu */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 flex-1">
-                  <FlagImg code="cz" size={48} />
+                  <Flag code="cz" size={48} />
                   <span className="font-semibold text-sm">Česko</span>
                 </div>
 
@@ -187,7 +185,7 @@ export default function Matches() {
 
                 <div className="flex items-center gap-3 flex-1 justify-end">
                   <span className="font-semibold text-sm">{match.opponent}</span>
-                  <FlagImg code={oppCode} size={48} />
+                  <Flag code={oppCode} size={48} />
                 </div>
               </div>
 

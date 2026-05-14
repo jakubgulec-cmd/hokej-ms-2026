@@ -35,9 +35,10 @@ const COUNTRY_CODE: Record<string, string> = {
 
 function Flag({ code }: { code: string }) {
   return (
-    <span
-      className={`fi fi-${code}`}
-      style={{ width: 48, height: 32, display: 'inline-block', borderRadius: 4 }}
+    <img
+      src={`${process.env.PUBLIC_URL}/flags/${code}.png`}
+      alt={code}
+      style={{ width: 48, height: 32, objectFit: 'cover', borderRadius: 4 }}
     />
   );
 }

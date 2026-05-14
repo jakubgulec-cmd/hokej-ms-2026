@@ -266,128 +266,146 @@ export default function Matches() {
                 {statusBadge}
               </div>
 
-              {/* TÝMY */}
-              <div className="px-5 pt-5 pb-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Flag code={match.home_code} size={52} />
-                    <span className="font-bold text-base truncate">{match.home_team}</span>
-                  </div>
-                  <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                    <span className="font-bold text-base truncate">{match.away_team}</span>
-                    <Flag code={match.away_code} size={52} />
-                  </div>
-                </div>
-              </div>
-
-              {/* OBSAH PODLE STAVU */}
-              <div className="px-5 pb-5">
-                {finished && (
-                  <>
-                    <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl py-4 mb-3">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-500 text-center mb-1">Konečný výsledek</p>
-                      <p className="text-4xl font-bold tracking-wider text-center">
-                        {match.home_goals} <span className="text-slate-500 font-light">:</span> {match.away_goals}
-                      </p>
-                    </div>
-                    {pred ? (
-                      <div className={`rounded-xl border px-4 py-3 ${getPointsLabel(pred, match).bg}`}>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Tvůj tip</p>
-                            <p className="font-bold text-lg">{pred.home_goals} : {pred.away_goals}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className={`text-xs font-medium ${getPointsLabel(pred, match).color}`}>
-                              {getPointsLabel(pred, match).text}
-                            </p>
-                            <p className={`font-bold text-xl ${getPointsLabel(pred, match).color}`}>
-                              {getPointsLabel(pred, match).sub}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-slate-500 text-center py-2">Tip jsi nevyplnil</p>
-                    )}
-                  </>
-                )}
-
+              <div className="px-5 pt-5 pb-5">
+                {/* Live alert NAHOŘE pro live zápasy */}
                 {live && (
-                  <>
-                    <div className="bg-red-950/40 border border-red-900/60 rounded-xl py-4 mb-3">
-                      <p className="text-[10px] uppercase tracking-widest text-red-400 text-center mb-1 flex items-center justify-center gap-1.5">
-                        <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                        Průběžné skóre
-                      </p>
-                      <p className="text-4xl font-bold tracking-wider text-center">
-                        {match.live_home_goals} <span className="text-slate-500 font-light">:</span> {match.live_away_goals}
-                      </p>
-                    </div>
-                    {pred && (
-                      <div className="bg-slate-700/30 border border-slate-700/50 rounded-xl px-4 py-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-slate-400">Tvůj tip</span>
-                          <span className="font-bold">{pred.home_goals} : {pred.away_goals}</span>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                  <div className="flex items-center justify-center gap-2 mb-3 text-[10px] uppercase tracking-widest text-red-400 font-bold">
+                    <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                    Průběžné skóre
+                  </div>
                 )}
 
-                {!finished && !live && (
-                  <div>
-                    {locked && (
-                      <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-950/30 border border-amber-900/50 rounded-lg px-3 py-2 mb-3">
-                        <span>🔒</span>
-                        <span>Tipy jsou uzamčeny — zápas už začal</span>
-                      </div>
-                    )}
+                {locked && !finished && !live && (
+                  <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-950/30 border border-amber-900/50 rounded-lg px-3 py-2 mb-3">
+                    <span>🔒</span>
+                    <span>Tipy jsou uzamčeny — zápas už začal</span>
+                  </div>
+                )}
 
-                    <div className="flex items-stretch gap-2 h-16">
-                      <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={inp.h}
-                        onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, h: e.target.value } }))}
-                        disabled={locked}
-                        placeholder="—"
-                        className="flex-1 min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                      />
+                {/* HLAVNÍ GRID: hlavičky / hodnoty / tlačítko */}
+                <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-start">
+                  {/* Hlavička HOME (vlevo zarovnaná s inputem) */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Flag code={match.home_code} size={48} />
+                    <span className="font-bold text-sm truncate">{match.home_team}</span>
+                  </div>
 
-                      <span className="text-slate-500 text-2xl font-light self-center">:</span>
+                  <div /> {/* mezera pro ":" */}
 
-                      <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={inp.a}
-                        onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, a: e.target.value } }))}
-                        disabled={locked}
-                        placeholder="—"
-                        className="flex-1 min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                      />
+                  {/* Hlavička AWAY (vpravo zarovnaná s inputem) */}
+                  <div className="flex items-center gap-2 min-w-0 justify-end">
+                    <span className="font-bold text-sm truncate">{match.away_team}</span>
+                    <Flag code={match.away_code} size={48} />
+                  </div>
 
+                  {/* HODNOTA HOME */}
+                  {finished ? (
+                    <div className="h-16 bg-slate-900/60 border border-slate-700/50 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold">{match.home_goals}</span>
+                    </div>
+                  ) : live ? (
+                    <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold">{match.live_home_goals}</span>
+                    </div>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={inp.h}
+                      onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, h: e.target.value } }))}
+                      disabled={locked}
+                      placeholder="—"
+                      className="h-16 w-full min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    />
+                  )}
+
+                  {/* DVOJTEČKA — zarovnaná s inputy */}
+                  <div className="h-16 flex items-center">
+                    <span className="text-slate-500 text-2xl font-light">:</span>
+                  </div>
+
+                  {/* HODNOTA AWAY */}
+                  {finished ? (
+                    <div className="h-16 bg-slate-900/60 border border-slate-700/50 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold">{match.away_goals}</span>
+                    </div>
+                  ) : live ? (
+                    <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold">{match.live_away_goals}</span>
+                    </div>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={inp.a}
+                      onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, a: e.target.value } }))}
+                      disabled={locked}
+                      placeholder="—"
+                      className="h-16 w-full min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    />
+                  )}
+
+                  {/* TLAČÍTKO TIPUJ — pod prvním inputem, jen pro upcoming */}
+                  {!finished && !live && (
+                    <>
                       <button
                         onClick={() => handleSave(match.id)}
                         disabled={locked || saving === match.id}
-                        className={`px-5 font-semibold rounded-xl transition text-sm whitespace-nowrap ${
+                        className={`h-12 w-full font-semibold rounded-xl transition text-sm ${
                           savedFlash === match.id
                             ? 'bg-green-600 text-white'
                             : 'bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white'
                         }`}
                       >
-                        {savedFlash === match.id ? '✓ Uloženo' : saving === match.id ? '...' : pred ? 'Změnit' : 'Tipuj'}
+                        {savedFlash === match.id ? '✓ Uloženo' : saving === match.id ? '...' : pred ? 'Změnit tip' : 'Tipuj'}
                       </button>
-                    </div>
+                      <div /> {/* prázdno pod dvojtečkou */}
+                      <div /> {/* prázdno pod druhým inputem */}
+                    </>
+                  )}
+                </div>
 
-                    {pred && (
-                      <p className="text-xs text-slate-500 mt-2">
-                        Aktuální tip: <span className="text-slate-300 font-medium">{pred.home_goals} : {pred.away_goals}</span>
-                      </p>
-                    )}
+                {/* TVŮJ TIP — pro finished s body */}
+                {finished && pred && (
+                  <div className={`mt-3 rounded-xl border px-4 py-3 ${getPointsLabel(pred, match).bg}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Tvůj tip</p>
+                        <p className="font-bold text-lg">{pred.home_goals} : {pred.away_goals}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-xs font-medium ${getPointsLabel(pred, match).color}`}>
+                          {getPointsLabel(pred, match).text}
+                        </p>
+                        <p className={`font-bold text-xl ${getPointsLabel(pred, match).color}`}>
+                          {getPointsLabel(pred, match).sub}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                )}
+
+                {finished && !pred && (
+                  <p className="text-sm text-slate-500 text-center mt-3">Tip jsi nevyplnil</p>
+                )}
+
+                {/* TVŮJ TIP — pro live */}
+                {live && pred && (
+                  <div className="mt-3 bg-slate-700/30 border border-slate-700/50 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-400">Tvůj tip</span>
+                      <span className="font-bold">{pred.home_goals} : {pred.away_goals}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Aktuální tip info pro upcoming */}
+                {!finished && !live && pred && (
+                  <p className="text-xs text-slate-500 mt-3">
+                    Aktuální tip: <span className="text-slate-300 font-medium">{pred.home_goals} : {pred.away_goals}</span>
+                  </p>
                 )}
               </div>
             </div>

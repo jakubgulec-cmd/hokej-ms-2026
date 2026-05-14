@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/hokej-ms-2026/static/css/main.b800097e.css",
+    "main.js": "/hokej-ms-2026/static/js/main.e839d849.js",
+    "index.html": "/hokej-ms-2026/index.html",
+    "main.b800097e.css.map": "/hokej-ms-2026/static/css/main.b800097e.css.map",
+    "main.e839d849.js.map": "/hokej-ms-2026/static/js/main.e839d849.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b800097e.css",
+    "static/js/main.e839d849.js"
+  ]
+}

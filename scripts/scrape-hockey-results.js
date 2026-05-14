@@ -25,36 +25,28 @@ function parseResult(html) {
 
   if (!homeMatch || !visitMatch) return null;
 
-  // Zjisti jestli je Česko domácí nebo hostující tým
-  const homeTeamMatch = html.match(/class="team-home"[\s\S]*?<h2 class="long">(.*?)<\/h2>/);
-  const homeTeamName = homeTeamMatch ? homeTeamMatch[1].trim().toLowerCase() : '';
-  const czechIsHome = homeTeamName.includes('česk') || homeTeamName.includes('czech');
-
-  const homeScore = parseInt(homeMatch[1]);
-  const visitScore = parseInt(visitMatch[1]);
-
-  const czechGoals = czechIsHome ? homeScore : visitScore;
-  const oppGoals = czechIsHome ? visitScore : homeScore;
+  const homeGoals = parseInt(homeMatch[1]);
+  const awayGoals = parseInt(visitMatch[1]);
 
   const statusText = statusMatch ? statusMatch[1].toLowerCase() : '';
   const isFinished = statusText === 'konec' || statusText === 'after so' || statusText === 'after pen';
 
-  return { czechGoals, oppGoals, isFinished, statusText };
+  return { homeGoals, awayGoals, isFinished, statusText };
 }
 
-function calculatePoints(predCz, predOpp, realCz, realOpp) {
+function calculatePoints(predH, predA, realH, realA) {
   // Přesný tip → +3
-  if (predCz === realCz && predOpp === realOpp) return 3;
+  if (predH === realH && predA === realA) return 3;
 
   let points = 0;
 
-  // Správný výsledek zápasu → +2
-  const predResult = predCz > predOpp ? 'W' : predCz < predOpp ? 'L' : 'D';
-  const realResult = realCz > realOpp ? 'W' : realCz < realOpp ? 'L' : 'D';
+  // Správný výsledek (home win / away win / draw) → +2
+  const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
+  const realResult = realH > realA ? 'H' : realH < realA ? 'A' : 'D';
   if (predResult === realResult) points += 2;
 
   // Správný rozdíl → +1
-  if (Math.abs(predCz - predOpp) === Math.abs(realCz - realOpp)) points += 1;
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) points += 1;
 
   return points;
 }
@@ -62,10 +54,9 @@ function calculatePoints(predCz, predOpp, realCz, realOpp) {
 async function main() {
   console.log(`\n🏒 Scraper started: ${new Date().toLocaleString('cs-CZ')}`);
 
-  // Načti zápasy které ještě nejsou hotové
   const { data: matches, error } = await supabase
     .from('matches')
-    .select('id, opponent, match_date, status, hokej_cz_id')
+    .select('id, home_team, away_team, match_date, status, hokej_cz_id')
     .neq('status', 'finished');
 
   if (error) { console.error('DB error:', error); process.exit(1); }
@@ -75,10 +66,12 @@ async function main() {
   }
 
   const now = new Date();
+  let processed = 0;
 
   for (const match of matches) {
     const minutesElapsed = (now - new Date(match.match_date)) / 60000;
-    console.log(`\n[${match.opponent}] Uplynulo: ${minutesElapsed.toFixed(0)} min`);
+    const label = `${match.home_team} vs ${match.away_team}`;
+    console.log(`\n[${label}] Uplynulo: ${minutesElapsed.toFixed(0)} min`);
 
     if (minutesElapsed < MIN_WAIT_MINUTES) {
       const waitLeft = (MIN_WAIT_MINUTES - minutesElapsed).toFixed(0);
@@ -87,7 +80,7 @@ async function main() {
     }
 
     if (!match.hokej_cz_id) {
-      console.log(`⚠️  Chybí hokej_cz_id pro ${match.opponent}`);
+      console.log(`⚠️  Chybí hokej_cz_id`);
       continue;
     }
 
@@ -102,63 +95,59 @@ async function main() {
         continue;
       }
 
-      console.log(`📊 ${result.czechGoals}:${result.oppGoals} (${result.statusText || 'neznámý status'})`);
+      console.log(`📊 ${result.homeGoals}:${result.awayGoals} (${result.statusText || 'neznámý status'})`);
 
       if (!result.isFinished) {
-        // Zápas ještě neskončil — uložit průběžné skóre, NEpočítat body
         await supabase.from('matches').update({
           status: 'ongoing',
-          live_czech_goals: result.czechGoals,
-          live_opponent_goals: result.oppGoals,
+          live_home_goals: result.homeGoals,
+          live_away_goals: result.awayGoals,
         }).eq('id', match.id);
-        console.log(`🔴 LIVE ${result.czechGoals}:${result.oppGoals} — čekáme na "konec"...`);
+        console.log(`🔴 LIVE ${result.homeGoals}:${result.awayGoals}`);
         continue;
       }
 
-      // Zápas skončil ("konec") — uložit finální výsledek, vymazat live
+      // Zápas skončil
       const { error: updateError } = await supabase
         .from('matches')
         .update({
-          czech_goals: result.czechGoals,
-          opponent_goals: result.oppGoals,
+          home_goals: result.homeGoals,
+          away_goals: result.awayGoals,
           status: 'finished',
-          live_czech_goals: null,
-          live_opponent_goals: null,
+          live_home_goals: null,
+          live_away_goals: null,
         })
         .eq('id', match.id);
 
       if (updateError) { console.error('Update error:', updateError); continue; }
-
-      console.log(`✅ Finální výsledek uložen: ${result.czechGoals}:${result.oppGoals}`);
+      console.log(`✅ Finální: ${result.homeGoals}:${result.awayGoals}`);
 
       // Vypočítej body pro všechny tipy
-      if (result.isFinished) {
-        const { data: preds } = await supabase
-          .from('predictions')
-          .select('id, czech_goals, opponent_goals')
-          .eq('match_id', match.id);
+      const { data: preds } = await supabase
+        .from('predictions')
+        .select('id, home_goals, away_goals')
+        .eq('match_id', match.id);
 
-        if (preds && preds.length > 0) {
-          for (const pred of preds) {
-            const pts = calculatePoints(pred.czech_goals, pred.opponent_goals, result.czechGoals, result.oppGoals);
-            await supabase
-              .from('predictions')
-              .update({ points: pts, locked: true })
-              .eq('id', pred.id);
-          }
-          console.log(`✅ Body vypočítány pro ${preds.length} tipů`);
+      if (preds && preds.length > 0) {
+        for (const pred of preds) {
+          const pts = calculatePoints(pred.home_goals, pred.away_goals, result.homeGoals, result.awayGoals);
+          await supabase
+            .from('predictions')
+            .update({ points: pts, locked: true })
+            .eq('id', pred.id);
         }
+        console.log(`✅ Body vypočítány pro ${preds.length} tipů`);
       }
 
+      processed++;
     } catch (err) {
-      console.error(`❌ Chyba při scrapování ${match.opponent}:`, err.message);
+      console.error(`❌ Chyba:`, err.message);
     }
 
-    // Rate limit mezi requesty
     await new Promise(r => setTimeout(r, 1000));
   }
 
-  console.log(`\n✅ Scraper dokončen: ${new Date().toLocaleString('cs-CZ')}`);
+  console.log(`\n✅ Scraper dokončen, zpracováno: ${processed}`);
   process.exit(0);
 }
 

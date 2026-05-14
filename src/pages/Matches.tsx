@@ -1,39 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Match {
   id: string;
-  opponent: string;
+  home_team: string;
+  home_code: string;
+  away_team: string;
+  away_code: string;
   match_date: string;
-  czech_goals: number | null;
-  opponent_goals: number | null;
-  live_czech_goals: number | null;
-  live_opponent_goals: number | null;
+  home_goals: number | null;
+  away_goals: number | null;
+  live_home_goals: number | null;
+  live_away_goals: number | null;
   status: string;
+  group: string | null;
 }
 
 interface Prediction {
   id: string;
   match_id: string;
-  czech_goals: number;
-  opponent_goals: number;
+  home_goals: number;
+  away_goals: number;
   points: number;
   locked: boolean;
 }
 
-const COUNTRY_CODE: Record<string, string> = {
-  'Dánsko': 'dk',
-  'Slovinsko': 'si',
-  'Švédsko': 'se',
-  'Itálie': 'it',
-  'Slovensko': 'sk',
-  'Norsko': 'no',
-  'Kanada': 'ca',
-  'Švédsko-test': 'se',
-};
-
-function Flag({ code, size = 56 }: { code: string; size?: number }) {
+function Flag({ code, size = 52 }: { code: string; size?: number }) {
   return (
     <img
       src={`${process.env.PUBLIC_URL}/flags/${code}.png`}
@@ -44,6 +37,7 @@ function Flag({ code, size = 56 }: { code: string; size?: number }) {
         objectFit: 'cover',
         borderRadius: 6,
         boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+        flexShrink: 0,
       }}
     />
   );
@@ -51,9 +45,9 @@ function Flag({ code, size = 56 }: { code: string; size?: number }) {
 
 function getPointsLabel(pred: Prediction, match: Match) {
   const p = pred.points;
-  const isExact = pred.czech_goals === match.czech_goals && pred.opponent_goals === match.opponent_goals;
+  const isExact = pred.home_goals === match.home_goals && pred.away_goals === match.away_goals;
   if (isExact) return { text: 'Přesný tip', sub: '+3 body', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-700/50' };
-  if (p === 3) return { text: 'Správný výsledek + rozdíl', sub: '+3 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
+  if (p === 3) return { text: 'Výsledek + rozdíl', sub: '+3 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
   if (p === 2) return { text: 'Správný výsledek', sub: '+2 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
   if (p === 1) return { text: 'Správný rozdíl', sub: '+1 bod', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
   return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-500', bg: 'bg-slate-700/30 border-slate-700' };
@@ -67,14 +61,17 @@ function formatDate(date: Date) {
   return `${dayCap} ${rest} • ${time}`;
 }
 
+type FilterType = 'all' | 'cz' | 'upcoming' | 'finished';
+
 export default function Matches() {
   const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [predictions, setPredictions] = useState<Record<string, Prediction>>({});
-  const [inputs, setInputs] = useState<Record<string, { cz: string; opp: string }>>({});
+  const [inputs, setInputs] = useState<Record<string, { h: string; a: string }>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterType>('cz');
 
   useEffect(() => {
     if (!user) return;
@@ -91,9 +88,9 @@ export default function Matches() {
       predData?.forEach(p => { predMap[p.match_id] = p; });
       setPredictions(predMap);
 
-      const initInputs: Record<string, { cz: string; opp: string }> = {};
+      const initInputs: Record<string, { h: string; a: string }> = {};
       predData?.forEach(p => {
-        initInputs[p.match_id] = { cz: String(p.czech_goals), opp: String(p.opponent_goals) };
+        initInputs[p.match_id] = { h: String(p.home_goals), a: String(p.away_goals) };
       });
       setInputs(initInputs);
 
@@ -117,15 +114,15 @@ export default function Matches() {
   const handleSave = async (matchId: string) => {
     if (!user) return;
     const inp = inputs[matchId];
-    if (!inp || inp.cz === '' || inp.opp === '') {
+    if (!inp || inp.h === '' || inp.a === '') {
       alert('Vyplň oba tipy');
       return;
     }
 
-    const cz = parseInt(inp.cz);
-    const opp = parseInt(inp.opp);
+    const h = parseInt(inp.h);
+    const a = parseInt(inp.a);
 
-    if (isNaN(cz) || isNaN(opp) || cz < 0 || opp < 0) {
+    if (isNaN(h) || isNaN(a) || h < 0 || a < 0) {
       alert('Zadej platné číslo (0 nebo více)');
       return;
     }
@@ -138,15 +135,15 @@ export default function Matches() {
     if (existing) {
       ({ error } = await supabase
         .from('predictions')
-        .update({ czech_goals: cz, opponent_goals: opp })
+        .update({ home_goals: h, away_goals: a })
         .eq('id', existing.id));
       if (!error) {
-        setPredictions(prev => ({ ...prev, [matchId]: { ...existing, czech_goals: cz, opponent_goals: opp } }));
+        setPredictions(prev => ({ ...prev, [matchId]: { ...existing, home_goals: h, away_goals: a } }));
       }
     } else {
       const { data, error: insertError } = await supabase
         .from('predictions')
-        .insert({ user_id: user.id, match_id: matchId, czech_goals: cz, opponent_goals: opp })
+        .insert({ user_id: user.id, match_id: matchId, home_goals: h, away_goals: a })
         .select()
         .single();
       error = insertError;
@@ -164,6 +161,15 @@ export default function Matches() {
     }
   };
 
+  const filteredMatches = useMemo(() => {
+    return matches.filter(m => {
+      if (filter === 'cz') return m.home_code === 'cz' || m.away_code === 'cz';
+      if (filter === 'upcoming') return m.status === 'upcoming' && !isLocked(m.match_date);
+      if (filter === 'finished') return m.status === 'finished';
+      return true;
+    });
+  }, [matches, filter]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -172,18 +178,18 @@ export default function Matches() {
     );
   }
 
-  // Sumarizace pro horní panel
-  const upcomingCount = matches.filter(m => m.status === 'upcoming' && !isLocked(m.match_date)).length;
+  // Souhrn
+  const tippableCount = matches.filter(m => m.status === 'upcoming' && !isLocked(m.match_date)).length;
   const finishedCount = matches.filter(m => m.status === 'finished').length;
   const myPoints = Object.values(predictions).reduce((sum, p) => sum + (p.points || 0), 0);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Souhrn nahoře */}
+      {/* Souhrn */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-3 text-center">
           <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">K tipování</p>
-          <p className="text-2xl font-bold">{upcomingCount}</p>
+          <p className="text-2xl font-bold">{tippableCount}</p>
         </div>
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-3 text-center">
           <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Odehráno</p>
@@ -195,24 +201,45 @@ export default function Matches() {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold mb-4">Zápasy MS</h1>
+      {/* Filtry */}
+      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+        {[
+          { id: 'cz' as FilterType, label: 'Česko' },
+          { id: 'all' as FilterType, label: 'Vše' },
+          { id: 'upcoming' as FilterType, label: 'K tipování' },
+          { id: 'finished' as FilterType, label: 'Odehráno' },
+        ].map(f => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap ${
+              filter === f.id
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
       <div className="space-y-4">
-        {matches.map(match => {
+        {filteredMatches.length === 0 && (
+          <p className="text-center text-slate-500 py-12">Žádné zápasy v této kategorii</p>
+        )}
+
+        {filteredMatches.map(match => {
           const pred = predictions[match.id];
           const locked = isLocked(match.match_date);
           const finished = match.status === 'finished';
-          const live = match.status === 'ongoing' && match.live_czech_goals !== null;
-          const inp = inputs[match.id] || { cz: '', opp: '' };
+          const live = match.status === 'ongoing' && match.live_home_goals !== null;
+          const inp = inputs[match.id] || { h: '', a: '' };
           const date = new Date(match.match_date);
-          const oppCode = COUNTRY_CODE[match.opponent] || 'un';
 
           // Status badge
           let statusBadge = null;
           if (finished) {
-            statusBadge = (
-              <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">Skončil</span>
-            );
+            statusBadge = <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">Skončil</span>;
           } else if (live) {
             statusBadge = (
               <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-red-400">
@@ -221,9 +248,7 @@ export default function Matches() {
               </span>
             );
           } else if (locked) {
-            statusBadge = (
-              <span className="text-[10px] font-bold tracking-widest uppercase text-amber-400">Zamčeno</span>
-            );
+            statusBadge = <span className="text-[10px] font-bold tracking-widest uppercase text-amber-400">Zamčeno</span>;
           }
 
           return (
@@ -245,13 +270,12 @@ export default function Matches() {
               <div className="px-5 pt-5 pb-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Flag code="cz" size={52} />
-                    <span className="font-bold text-base truncate">Česko</span>
+                    <Flag code={match.home_code} size={52} />
+                    <span className="font-bold text-base truncate">{match.home_team}</span>
                   </div>
-                  <span className="text-slate-500 text-sm font-light px-2">vs</span>
                   <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                    <span className="font-bold text-base truncate">{match.opponent}</span>
-                    <Flag code={oppCode} size={52} />
+                    <span className="font-bold text-base truncate">{match.away_team}</span>
+                    <Flag code={match.away_code} size={52} />
                   </div>
                 </div>
               </div>
@@ -263,7 +287,7 @@ export default function Matches() {
                     <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl py-4 mb-3">
                       <p className="text-[10px] uppercase tracking-widest text-slate-500 text-center mb-1">Konečný výsledek</p>
                       <p className="text-4xl font-bold tracking-wider text-center">
-                        {match.czech_goals} <span className="text-slate-500 font-light">:</span> {match.opponent_goals}
+                        {match.home_goals} <span className="text-slate-500 font-light">:</span> {match.away_goals}
                       </p>
                     </div>
                     {pred ? (
@@ -271,7 +295,7 @@ export default function Matches() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Tvůj tip</p>
-                            <p className="font-bold text-lg">{pred.czech_goals} : {pred.opponent_goals}</p>
+                            <p className="font-bold text-lg">{pred.home_goals} : {pred.away_goals}</p>
                           </div>
                           <div className="text-right">
                             <p className={`text-xs font-medium ${getPointsLabel(pred, match).color}`}>
@@ -297,14 +321,14 @@ export default function Matches() {
                         Průběžné skóre
                       </p>
                       <p className="text-4xl font-bold tracking-wider text-center">
-                        {match.live_czech_goals} <span className="text-slate-500 font-light">:</span> {match.live_opponent_goals}
+                        {match.live_home_goals} <span className="text-slate-500 font-light">:</span> {match.live_away_goals}
                       </p>
                     </div>
                     {pred && (
                       <div className="bg-slate-700/30 border border-slate-700/50 rounded-xl px-4 py-3">
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-slate-400">Tvůj tip</span>
-                          <span className="font-bold">{pred.czech_goals} : {pred.opponent_goals}</span>
+                          <span className="font-bold">{pred.home_goals} : {pred.away_goals}</span>
                         </div>
                       </div>
                     )}
@@ -320,51 +344,47 @@ export default function Matches() {
                       </div>
                     )}
 
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          max="20"
-                          value={inp.cz}
-                          onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, cz: e.target.value } }))}
-                          disabled={locked}
-                          placeholder="—"
-                          className="w-full bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 py-3.5 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                        />
-                      </div>
+                    <div className="flex items-stretch gap-2 h-16">
+                      <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={inp.h}
+                        onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, h: e.target.value } }))}
+                        disabled={locked}
+                        placeholder="—"
+                        className="flex-1 min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      />
 
-                      <span className="text-slate-500 text-2xl font-light pb-3">:</span>
+                      <span className="text-slate-500 text-2xl font-light self-center">:</span>
 
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          max="20"
-                          value={inp.opp}
-                          onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, opp: e.target.value } }))}
-                          disabled={locked}
-                          placeholder="—"
-                          className="w-full bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 py-3.5 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={inp.a}
+                        onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, a: e.target.value } }))}
+                        disabled={locked}
+                        placeholder="—"
+                        className="flex-1 min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      />
 
                       <button
                         onClick={() => handleSave(match.id)}
                         disabled={locked || saving === match.id}
-                        className={`px-5 py-3.5 font-semibold rounded-xl transition text-sm whitespace-nowrap ${
+                        className={`px-5 font-semibold rounded-xl transition text-sm whitespace-nowrap ${
                           savedFlash === match.id
                             ? 'bg-green-600 text-white'
                             : 'bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white'
                         }`}
                       >
-                        {savedFlash === match.id ? '✓ Uloženo' : saving === match.id ? '...' : pred ? 'Změnit tip' : 'Tipuj'}
+                        {savedFlash === match.id ? '✓ Uloženo' : saving === match.id ? '...' : pred ? 'Změnit' : 'Tipuj'}
                       </button>
                     </div>
 
                     {pred && (
                       <p className="text-xs text-slate-500 mt-2">
-                        Aktuální tip: <span className="text-slate-300 font-medium">{pred.czech_goals} : {pred.opponent_goals}</span>
+                        Aktuální tip: <span className="text-slate-300 font-medium">{pred.home_goals} : {pred.away_goals}</span>
                       </p>
                     )}
                   </div>

@@ -22,15 +22,27 @@ interface Prediction {
   locked: boolean;
 }
 
-const FLAG: Record<string, string> = {
-  'Dánsko': '🇩🇰',
-  'Slovinsko': '🇸🇮',
-  'Švédsko': '🇸🇪',
-  'Itálie': '🇮🇹',
-  'Slovensko': '🇸🇰',
-  'Norsko': '🇳🇴',
-  'Kanada': '🇨🇦',
+const COUNTRY_CODE: Record<string, string> = {
+  'Dánsko': 'dk',
+  'Slovinsko': 'si',
+  'Švédsko': 'se',
+  'Itálie': 'it',
+  'Slovensko': 'sk',
+  'Norsko': 'no',
+  'Kanada': 'ca',
+  'Švédsko-test': 'se',
 };
+
+function FlagImg({ code, size = 40 }: { code: string; size?: number }) {
+  return (
+    <img
+      src={`https://flagcdn.com/w${size}/${code}.png`}
+      alt={code}
+      className="rounded shadow-sm"
+      style={{ width: size, height: size * 0.67, objectFit: 'cover' }}
+    />
+  );
+}
 
 function getPointsLabel(pred: Prediction, match: Match) {
   const p = pred.points;
@@ -149,7 +161,7 @@ export default function Matches() {
           const finished = match.status === 'finished';
           const inp = inputs[match.id] || { cz: '', opp: '' };
           const date = new Date(match.match_date);
-          const flag = FLAG[match.opponent] || '🏳️';
+          const oppCode = COUNTRY_CODE[match.opponent] || 'un';
 
           return (
             <div
@@ -158,19 +170,24 @@ export default function Matches() {
             >
               {/* Hlavička zápasu */}
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">🇨🇿</span>
-                  <span className="text-slate-400 font-medium">vs</span>
-                  <span className="text-3xl">{flag}</span>
-                  <span className="font-semibold">{match.opponent}</span>
+                <div className="flex items-center gap-3 flex-1">
+                  <FlagImg code="cz" size={48} />
+                  <span className="font-semibold text-sm">Česko</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-400">
+
+                <div className="flex flex-col items-center px-3">
+                  <span className="text-slate-500 text-xs font-medium">vs</span>
+                  <p className="text-xs text-slate-400 mt-1">
                     {date.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}
                   </p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-xs text-slate-400">
                     {date.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
                   </p>
+                </div>
+
+                <div className="flex items-center gap-3 flex-1 justify-end">
+                  <span className="font-semibold text-sm">{match.opponent}</span>
+                  <FlagImg code={oppCode} size={48} />
                 </div>
               </div>
 

@@ -32,10 +32,10 @@ section('1) Scoring logika');
 function calculatePoints(predH, predA, realH, realA) {
   if (predH === realH && predA === realA) return 3;
   let points = 0;
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) points += 2;
   const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
   const realResult = realH > realA ? 'H' : realH < realA ? 'A' : 'D';
-  if (predResult === realResult) points += 2;
-  if (Math.abs(predH - predA) === Math.abs(realH - realA)) points += 1;
+  if (predResult === realResult) points += 1;
   return points;
 }
 
@@ -59,22 +59,22 @@ assert('Výsledek A + rozdíl 2 (1:3 vs 2:4) → 3 body', wd2 === 3, 3, wd2);
 const wd3 = calculatePoints(2, 2, 5, 5);
 assert('Remíza + rozdíl 0 (2:2 vs 5:5) → 3 body', wd3 === 3, 3, wd3);
 
-// Pouze správný výsledek (rozdíl jiný)
+// Pouze správný výsledek (rozdíl jiný) → 1 bod
 const winOnly1 = calculatePoints(5, 1, 3, 2);
-assert('Pouze výsledek H (5:1 vs 3:2) → 2 body', winOnly1 === 2, 2, winOnly1);
+assert('Pouze výsledek H (5:1 vs 3:2) → 1 bod', winOnly1 === 1, 1, winOnly1);
 
 const winOnly2 = calculatePoints(0, 4, 1, 2);
-assert('Pouze výsledek A (0:4 vs 1:2) → 2 body', winOnly2 === 2, 2, winOnly2);
+assert('Pouze výsledek A (0:4 vs 1:2) → 1 bod', winOnly2 === 1, 1, winOnly2);
 
 const drawOnly = calculatePoints(1, 1, 3, 3);
 assert('Pouze remíza (1:1 vs 3:3) → 3 body (oba výsledek i rozdíl 0)', drawOnly === 3, 3, drawOnly);
 
-// Pouze správný rozdíl (výsledek opačný)
+// Pouze správný rozdíl (výsledek opačný) → 2 body
 const diffOnly1 = calculatePoints(4, 2, 1, 3);
-assert('Pouze rozdíl (4:2 vs 1:3, oba rozdíl 2, opačný winner) → 1 bod', diffOnly1 === 1, 1, diffOnly1);
+assert('Pouze rozdíl (4:2 vs 1:3, oba rozdíl 2, opačný winner) → 2 body', diffOnly1 === 2, 2, diffOnly1);
 
 const diffOnly2 = calculatePoints(2, 5, 5, 2);
-assert('Pouze rozdíl (2:5 vs 5:2, oba rozdíl 3, opačný winner) → 1 bod', diffOnly2 === 1, 1, diffOnly2);
+assert('Pouze rozdíl (2:5 vs 5:2, oba rozdíl 3, opačný winner) → 2 body', diffOnly2 === 2, 2, diffOnly2);
 
 // 0 bodů
 const zero1 = calculatePoints(5, 0, 1, 4);
@@ -196,7 +196,7 @@ const users = [
 
 const expected = {
   'Alice': 3, 'Bob': 3, 'Carl': 3, 'Dana': 3,
-  'Eve': 2, 'Frank': 0, 'Greg': 0, 'Helen': 1,
+  'Eve': 1, 'Frank': 0, 'Greg': 0, 'Helen': 2,
 };
 
 for (const u of users) {

@@ -11,12 +11,12 @@ export default function Rules() {
             <span className="text-yellow-400 font-bold whitespace-nowrap">+3 body</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Správný výsledek (výhra / prohra)</span>
-            <span className="text-green-400 font-bold whitespace-nowrap">+2 body</span>
+            <span>Správný rozdíl (např. 4:2 → 6:4)</span>
+            <span className="text-blue-400 font-bold whitespace-nowrap">+2 body</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Správný rozdíl (např. 4:2 → 6:4)</span>
-            <span className="text-blue-400 font-bold whitespace-nowrap">+1 bod</span>
+            <span>Správný výsledek (výhra / prohra)</span>
+            <span className="text-green-400 font-bold whitespace-nowrap">+1 bod</span>
           </div>
         </div>
         <p className="text-xs text-slate-500 mt-5 leading-relaxed">

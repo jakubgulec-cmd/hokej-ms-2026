@@ -47,9 +47,9 @@ function getPointsLabel(pred: Prediction, match: Match) {
   const p = pred.points;
   const isExact = pred.home_goals === match.home_goals && pred.away_goals === match.away_goals;
   if (isExact) return { text: 'Přesný tip', sub: '+3 body', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-700/50' };
-  if (p === 3) return { text: 'Výsledek + rozdíl', sub: '+3 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
-  if (p === 2) return { text: 'Správný výsledek', sub: '+2 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
-  if (p === 1) return { text: 'Správný rozdíl', sub: '+1 bod', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
+  if (p === 3) return { text: 'Rozdíl + výsledek', sub: '+3 body', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
+  if (p === 2) return { text: 'Správný rozdíl', sub: '+2 body', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
+  if (p === 1) return { text: 'Správný výsledek', sub: '+1 bod', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
   return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-500', bg: 'bg-slate-700/30 border-slate-700' };
 }
 

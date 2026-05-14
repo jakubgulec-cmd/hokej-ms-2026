@@ -18,6 +18,20 @@
     <meta name="mobile-web-app-capable" content="yes" />
 
     <title>🏒 Hokej MS 2026 – Tipovačka</title>
+
+    <!-- SPA redirect — zpracuje URL z 404.html redirectu a zachová původní route -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
   <body>
     <noscript>Pro zobrazení aplikace je potřeba JavaScript.</noscript>

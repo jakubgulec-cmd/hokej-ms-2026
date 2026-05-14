@@ -1,5 +1,5 @@
 // Service Worker pro PWA — minimální offline cache pro shell
-const CACHE_NAME = 'hokej-tipovacka-v2';
+const CACHE_NAME = 'hokej-tipovacka-v3';
 const APP_SHELL = [
   './',
   './index.html',

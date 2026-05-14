@@ -127,6 +127,11 @@ export default function Matches() {
       return;
     }
 
+    if (h === a) {
+      alert('V hokeji nemůže skončit zápas remízou — vždy jeden tým vyhraje (v prodloužení nebo nájezdech).');
+      return;
+    }
+
     setSaving(matchId);
 
     const existing = predictions[matchId];

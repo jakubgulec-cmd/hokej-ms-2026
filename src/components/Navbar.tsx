@@ -30,7 +30,7 @@ export default function Navbar() {
               isActive('/leaderboard') ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Leaderboard
+            Výsledky
           </Link>
         </div>
 

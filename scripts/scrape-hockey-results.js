@@ -19,15 +19,23 @@ function fetchUrl(url) {
 }
 
 function parseResult(html) {
-  // Parsuj skóre z <span class="home"> a <span class="visiting">
   const homeMatch = html.match(/<span class="home">(\d+)<\/span>/);
   const visitMatch = html.match(/<span class="visiting">(\d+)<\/span>/);
   const statusMatch = html.match(/<span>(konec|přestávka|live|after so|after pen)<\/span>/i);
 
   if (!homeMatch || !visitMatch) return null;
 
-  const czechGoals = parseInt(homeMatch[1]);
-  const oppGoals = parseInt(visitMatch[1]);
+  // Zjisti jestli je Česko domácí nebo hostující tým
+  const homeTeamMatch = html.match(/class="team-home"[\s\S]*?<h2 class="long">(.*?)<\/h2>/);
+  const homeTeamName = homeTeamMatch ? homeTeamMatch[1].trim().toLowerCase() : '';
+  const czechIsHome = homeTeamName.includes('česk') || homeTeamName.includes('czech');
+
+  const homeScore = parseInt(homeMatch[1]);
+  const visitScore = parseInt(visitMatch[1]);
+
+  const czechGoals = czechIsHome ? homeScore : visitScore;
+  const oppGoals = czechIsHome ? visitScore : homeScore;
+
   const statusText = statusMatch ? statusMatch[1].toLowerCase() : '';
   const isFinished = statusText === 'konec' || statusText === 'after so' || statusText === 'after pen';
 

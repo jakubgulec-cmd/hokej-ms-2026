@@ -1,0 +1,26 @@
+name: Scrape Hockey Results
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install scraper dependencies
+        run: npm install @supabase/supabase-js
+        working-directory: ./scripts
+
+      - name: Run scraper
+        run: node scripts/scrape-hockey-results.js
+        env:
+          SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

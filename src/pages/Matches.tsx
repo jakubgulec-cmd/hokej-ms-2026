@@ -8,6 +8,8 @@ interface Match {
   match_date: string;
   czech_goals: number | null;
   opponent_goals: number | null;
+  live_czech_goals: number | null;
+  live_opponent_goals: number | null;
   status: string;
 }
 
@@ -173,6 +175,18 @@ export default function Matches() {
               </div>
 
               {/* Výsledek nebo input */}
+              {match.status === 'ongoing' && match.live_czech_goals !== null && (
+                <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-center mb-3">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span className="text-xs text-red-400 font-semibold tracking-widest uppercase">Live</span>
+                  </div>
+                  <p className="text-3xl font-bold tracking-widest">
+                    {match.live_czech_goals} : {match.live_opponent_goals}
+                  </p>
+                </div>
+              )}
+
               {finished ? (
                 <div className="space-y-3">
                   <div className="bg-slate-700/50 rounded-lg p-4 text-center">

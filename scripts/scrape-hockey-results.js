@@ -105,16 +105,26 @@ async function main() {
       console.log(`📊 ${result.czechGoals}:${result.oppGoals} (${result.statusText || 'neznámý status'})`);
 
       if (!result.isFinished) {
-        // Zápas ještě neskončil — pouze označ jako probíhající, NEukládej průběžné skóre
-        await supabase.from('matches').update({ status: 'ongoing' }).eq('id', match.id);
-        console.log(`🔄 Zápas ještě běží, čekáme na "konec"...`);
+        // Zápas ještě neskončil — uložit průběžné skóre, NEpočítat body
+        await supabase.from('matches').update({
+          status: 'ongoing',
+          live_czech_goals: result.czechGoals,
+          live_opponent_goals: result.oppGoals,
+        }).eq('id', match.id);
+        console.log(`🔴 LIVE ${result.czechGoals}:${result.oppGoals} — čekáme na "konec"...`);
         continue;
       }
 
-      // Zápas skončil ("konec") — uložit finální výsledek
+      // Zápas skončil ("konec") — uložit finální výsledek, vymazat live
       const { error: updateError } = await supabase
         .from('matches')
-        .update({ czech_goals: result.czechGoals, opponent_goals: result.oppGoals, status: 'finished' })
+        .update({
+          czech_goals: result.czechGoals,
+          opponent_goals: result.oppGoals,
+          status: 'finished',
+          live_czech_goals: null,
+          live_opponent_goals: null,
+        })
         .eq('id', match.id);
 
       if (updateError) { console.error('Update error:', updateError); continue; }

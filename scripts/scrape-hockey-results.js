@@ -18,15 +18,38 @@ function fetchUrl(url) {
   });
 }
 
-function parseResult(html) {
-  const homeMatch = html.match(/<span class="home">(\d+)<\/span>/);
-  const visitMatch = html.match(/<span class="visiting">(\d+)<\/span>/);
+function parseResult(html, dbHomeTeam, dbAwayTeam) {
+  const homeScoreMatch = html.match(/<span class="home">(\d+)<\/span>/);
+  const visitScoreMatch = html.match(/<span class="visiting">(\d+)<\/span>/);
+  const homeNameMatch = html.match(/class="team-home"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
+  const visitNameMatch = html.match(/class="team-visiting"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
   const statusMatch = html.match(/<span>(konec|přestávka|live|after so|after pen)<\/span>/i);
 
-  if (!homeMatch || !visitMatch) return null;
+  if (!homeScoreMatch || !visitScoreMatch) return null;
+  if (!homeNameMatch || !visitNameMatch) return null;
 
-  const homeGoals = parseInt(homeMatch[1]);
-  const awayGoals = parseInt(visitMatch[1]);
+  const htmlHomeName = homeNameMatch[1].trim();
+  const htmlVisitName = visitNameMatch[1].trim();
+  const htmlHomeScore = parseInt(homeScoreMatch[1]);
+  const htmlVisitScore = parseInt(visitScoreMatch[1]);
+
+  // CRITICAL: Hokej.cz může mít prohozené pořadí home/away.
+  // Mapujeme skóre na DB pořadí podle jmen týmů.
+  let homeGoals, awayGoals;
+  if (htmlHomeName === dbHomeTeam && htmlVisitName === dbAwayTeam) {
+    // Pořadí v DB = pořadí na hokej.cz
+    homeGoals = htmlHomeScore;
+    awayGoals = htmlVisitScore;
+  } else if (htmlHomeName === dbAwayTeam && htmlVisitName === dbHomeTeam) {
+    // Prohozené pořadí — prohoď skóre
+    homeGoals = htmlVisitScore;
+    awayGoals = htmlHomeScore;
+    console.log(`   ⚠️  Prohozené pořadí na hokej.cz, mapuji: ${htmlHomeName}=${htmlHomeScore}, ${htmlVisitName}=${htmlVisitScore}`);
+  } else {
+    // Týmy v DB neodpovídají hokej.cz vůbec — varování
+    console.log(`   ❌ Týmy neodpovídají! DB: ${dbHomeTeam}/${dbAwayTeam}, HTML: ${htmlHomeName}/${htmlVisitName}`);
+    return null;
+  }
 
   const statusText = statusMatch ? statusMatch[1].toLowerCase() : '';
   const isFinished = statusText === 'konec' || statusText === 'after so' || statusText === 'after pen';
@@ -96,7 +119,7 @@ async function main() {
       const url = `https://www.hokej.cz/zapas/${match.hokej_cz_id}`;
       console.log(`🔍 Scrapuji: ${url}`);
       const html = await fetchUrl(url);
-      const result = parseResult(html);
+      const result = parseResult(html, match.home_team, match.away_team);
 
       if (!result) {
         console.log(`⚠️  Nepodařilo se naparsovat výsledek`);

@@ -74,7 +74,6 @@ async function main() {
     process.exit(0);
   }
 
-  const now = new Date();
   let processed = 0;
 
   for (const match of matches) {

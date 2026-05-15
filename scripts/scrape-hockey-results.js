@@ -19,34 +19,47 @@ function fetchUrl(url) {
 }
 
 function parseResult(html, dbHomeTeam, dbAwayTeam) {
-  const homeScoreMatch = html.match(/<span class="home">(\d+)<\/span>/);
-  const visitScoreMatch = html.match(/<span class="visiting">(\d+)<\/span>/);
-  const homeNameMatch = html.match(/class="team-home"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
-  const visitNameMatch = html.match(/class="team-visiting"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
-  const statusMatch = html.match(/<span>(konec|přestávka|live|after so|after pen)<\/span>/i);
+  // Izolovat jen match-score blok (aby se náhodou neparsoval jiný score na stránce)
+  const blockMatch = html.match(/<div class="row match-score">[\s\S]*?<div class="row banner-tipsport">/);
+  if (!blockMatch) {
+    console.log(`   ⚠️  Nenalezen "row match-score" blok`);
+    return null;
+  }
+  const block = blockMatch[0];
 
-  if (!homeScoreMatch || !visitScoreMatch) return null;
-  if (!homeNameMatch || !visitNameMatch) return null;
+  const homeScoreMatch = block.match(/<span class="home">(\d+)<\/span>/);
+  const visitScoreMatch = block.match(/<span class="visiting">(\d+)<\/span>/);
+  const homeNameMatch = block.match(/class="team-home"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
+  const visitNameMatch = block.match(/class="team-visiting"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
+  const statusMatch = block.match(/<span>(konec|přestávka|live|after so|after pen)<\/span>/i);
+
+  if (!homeScoreMatch || !visitScoreMatch) {
+    console.log(`   ⚠️  Skóre neparsováno (zápas možná nezačal)`);
+    return null;
+  }
+  if (!homeNameMatch || !visitNameMatch) {
+    console.log(`   ⚠️  Jména týmů nenalezena`);
+    return null;
+  }
 
   const htmlHomeName = homeNameMatch[1].trim();
   const htmlVisitName = visitNameMatch[1].trim();
   const htmlHomeScore = parseInt(homeScoreMatch[1]);
   const htmlVisitScore = parseInt(visitScoreMatch[1]);
 
-  // CRITICAL: Hokej.cz může mít prohozené pořadí home/away.
-  // Mapujeme skóre na DB pořadí podle jmen týmů.
+  console.log(`   HTML: ${htmlHomeName}=${htmlHomeScore} vs ${htmlVisitName}=${htmlVisitScore}`);
+  console.log(`   DB:   ${dbHomeTeam} vs ${dbAwayTeam}`);
+
   let homeGoals, awayGoals;
   if (htmlHomeName === dbHomeTeam && htmlVisitName === dbAwayTeam) {
-    // Pořadí v DB = pořadí na hokej.cz
     homeGoals = htmlHomeScore;
     awayGoals = htmlVisitScore;
+    console.log(`   ✓ Pořadí sedí: home=${homeGoals}, away=${awayGoals}`);
   } else if (htmlHomeName === dbAwayTeam && htmlVisitName === dbHomeTeam) {
-    // Prohozené pořadí — prohoď skóre
     homeGoals = htmlVisitScore;
     awayGoals = htmlHomeScore;
-    console.log(`   ⚠️  Prohozené pořadí na hokej.cz, mapuji: ${htmlHomeName}=${htmlHomeScore}, ${htmlVisitName}=${htmlVisitScore}`);
+    console.log(`   ⚠️  Prohozené pořadí, mapuji: home(${dbHomeTeam})=${homeGoals}, away(${dbAwayTeam})=${awayGoals}`);
   } else {
-    // Týmy v DB neodpovídají hokej.cz vůbec — varování
     console.log(`   ❌ Týmy neodpovídají! DB: ${dbHomeTeam}/${dbAwayTeam}, HTML: ${htmlHomeName}/${htmlVisitName}`);
     return null;
   }

@@ -52,14 +52,23 @@ function calculatePoints(predH, predA, realH, realA) {
 }
 
 async function main() {
-  console.log(`\n🏒 Scraper started: ${new Date().toLocaleString('cs-CZ')}`);
+  const now = new Date();
+  console.log(`\n🏒 Scraper started: ${now.toISOString()} (cs: ${now.toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' })})`);
+  console.log(`   SUPABASE_URL: ${process.env.SUPABASE_URL ? 'OK' : 'MISSING'}`);
+  console.log(`   SUPABASE_ANON_KEY: ${process.env.SUPABASE_ANON_KEY ? 'OK (' + process.env.SUPABASE_ANON_KEY.substring(0, 15) + '...)' : 'MISSING'}`);
 
   const { data: matches, error } = await supabase
     .from('matches')
     .select('id, home_team, away_team, match_date, status, hokej_cz_id')
     .neq('status', 'finished');
 
-  if (error) { console.error('DB error:', error); process.exit(1); }
+  if (error) {
+    console.error('❌ DB error:', JSON.stringify(error, null, 2));
+    process.exit(1);
+  }
+
+  console.log(`📋 Načteno ${matches?.length || 0} nehotových zápasů`);
+
   if (!matches || matches.length === 0) {
     console.log('✅ Všechny zápasy jsou hotové.');
     process.exit(0);

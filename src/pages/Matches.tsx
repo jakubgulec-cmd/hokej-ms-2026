@@ -99,14 +99,17 @@ export default function Matches() {
 
     load();
 
-    const sub = supabase
-      .channel('matches-changes')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'matches' }, payload => {
-        setMatches(prev => prev.map(m => m.id === payload.new.id ? payload.new as Match : m));
-      })
-      .subscribe();
+    // Místo realtime subscription (která může poslat neúplná data)
+    // pravidelně refreshujeme matches každých 30 sekund
+    const interval = setInterval(async () => {
+      const { data: matchData } = await supabase
+        .from('matches')
+        .select('*')
+        .order('match_date', { ascending: true });
+      if (matchData) setMatches(matchData);
+    }, 30000);
 
-    return () => { sub.unsubscribe(); };
+    return () => { clearInterval(interval); };
   }, [user]);
 
   const isLocked = (matchDate: string) => new Date(matchDate) <= new Date();

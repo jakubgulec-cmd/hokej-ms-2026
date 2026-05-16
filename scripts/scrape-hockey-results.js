@@ -93,10 +93,12 @@ async function main() {
   console.log(`   SUPABASE_URL: ${process.env.SUPABASE_URL ? 'OK' : 'MISSING'}`);
   console.log(`   SUPABASE_ANON_KEY: ${process.env.SUPABASE_ANON_KEY ? 'OK (' + process.env.SUPABASE_ANON_KEY.substring(0, 15) + '...)' : 'MISSING'}`);
 
+  // Zápasy: ne-finished + finished z posledních 12 hodin (pro případ že hokej.cz mění po konci)
+  const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString();
   const { data: matches, error } = await supabase
     .from('matches')
-    .select('id, home_team, away_team, match_date, status, hokej_cz_id')
-    .neq('status', 'finished');
+    .select('id, home_team, away_team, match_date, status, hokej_cz_id, home_goals, away_goals')
+    .or(`status.neq.finished,match_date.gte.${twelveHoursAgo}`);
 
   if (error) {
     console.error('❌ DB error:', JSON.stringify(error, null, 2));

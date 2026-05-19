@@ -31,7 +31,7 @@ function parseResult(html, dbHomeTeam, dbAwayTeam) {
   const visitScoreMatch = block.match(/<span class="visiting">(\d+)<\/span>/);
   const homeNameMatch = block.match(/class="team-home"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
   const visitNameMatch = block.match(/class="team-visiting"[\s\S]*?<h2 class="long">([^<]+)<\/h2>/);
-  const statusMatch = block.match(/<span>(konec|přestávka|live|after so|after pen)<\/span>/i);
+  const statusMatch = block.match(/<span>(konec[^<]*|přestávka|live|after so|after pen)<\/span>/i);
 
   if (!homeScoreMatch || !visitScoreMatch) {
     console.log(`   ⚠️  Skóre neparsováno (zápas možná nezačal)`);
@@ -64,8 +64,9 @@ function parseResult(html, dbHomeTeam, dbAwayTeam) {
     return null;
   }
 
-  const statusText = statusMatch ? statusMatch[1].toLowerCase() : '';
-  const isFinished = statusText === 'konec' || statusText === 'after so' || statusText === 'after pen';
+  const statusText = statusMatch ? statusMatch[1].toLowerCase().trim() : '';
+  // "konec" varianty: "konec", "konec po prodloužení", "konec po nájezdech", "after so", "after pen"
+  const isFinished = statusText.startsWith('konec') || statusText === 'after so' || statusText === 'after pen';
 
   return { homeGoals, awayGoals, isFinished, statusText };
 }

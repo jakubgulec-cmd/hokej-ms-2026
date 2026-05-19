@@ -11,16 +11,21 @@ export default function Rules() {
             <span className="text-yellow-400 font-bold whitespace-nowrap">+3 body</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Správný rozdíl (např. 4:2 → 6:4)</span>
+            <span>Správný výsledek + správný rozdíl<br /><span className="text-xs text-slate-500">(např. tip 4:2 → reálně 3:1)</span></span>
             <span className="text-blue-400 font-bold whitespace-nowrap">+2 body</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Správný výsledek (výhra / prohra)</span>
+            <span>Pouze správný výsledek (výhra / prohra)</span>
             <span className="text-green-400 font-bold whitespace-nowrap">+1 bod</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Špatný výsledek</span>
+            <span className="text-slate-500 font-bold whitespace-nowrap">0 bodů</span>
           </div>
         </div>
         <p className="text-xs text-slate-500 mt-5 leading-relaxed">
           V hokeji vždy jeden tým vyhraje (případně v prodloužení nebo nájezdech) — pravidla počítají s finálním výsledkem zápasu.
+          Bod za rozdíl se započítá <strong>jen pokud trefíš správný výsledek</strong> — pokud měl podle tebe vyhrát opačný tým, dostaneš 0 bodů i v případě stejného rozdílu.
         </p>
       </div>
     </div>

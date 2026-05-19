@@ -75,17 +75,16 @@ function calculatePoints(predH, predA, realH, realA) {
   // Přesný tip → +3
   if (predH === realH && predA === realA) return 3;
 
-  let points = 0;
-
-  // Správný rozdíl → +2
-  if (Math.abs(predH - predA) === Math.abs(realH - realA)) points += 2;
-
-  // Správný výsledek (home win / away win / draw) → +1
+  // Správný výsledek? (kdo vyhrál)
   const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
   const realResult = realH > realA ? 'H' : realH < realA ? 'A' : 'D';
-  if (predResult === realResult) points += 1;
 
-  return points;
+  // Špatný výsledek → 0 (i když by rozdíl náhodou souhlasil)
+  if (predResult !== realResult) return 0;
+
+  // Správný výsledek — kontroluj rozdíl
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 2; // Výsledek + rozdíl
+  return 1; // Jen výsledek
 }
 
 async function main() {

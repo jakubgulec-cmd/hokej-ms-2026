@@ -31,12 +31,11 @@ section('1) Scoring logika');
 
 function calculatePoints(predH, predA, realH, realA) {
   if (predH === realH && predA === realA) return 3;
-  let points = 0;
-  if (Math.abs(predH - predA) === Math.abs(realH - realA)) points += 2;
   const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
   const realResult = realH > realA ? 'H' : realH < realA ? 'A' : 'D';
-  if (predResult === realResult) points += 1;
-  return points;
+  if (predResult !== realResult) return 0;
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 2;
+  return 1;
 }
 
 // Přesný tip
@@ -49,15 +48,15 @@ assert('Přesný tip 0:0 (remíza) → 3 body', exact2 === 3, 3, exact2);
 const exact3 = calculatePoints(5, 4, 5, 4);
 assert('Přesný tip 5:4 → 3 body', exact3 === 3, 3, exact3);
 
-// Správný výsledek + správný rozdíl (ne přesný)
+// Správný výsledek + správný rozdíl (ne přesný) → 2 body
 const wd1 = calculatePoints(3, 1, 4, 2);
-assert('Výsledek H + rozdíl 2 (3:1 vs 4:2) → 3 body', wd1 === 3, 3, wd1);
+assert('Výsledek H + rozdíl 2 (3:1 vs 4:2) → 2 body', wd1 === 2, 2, wd1);
 
 const wd2 = calculatePoints(1, 3, 2, 4);
-assert('Výsledek A + rozdíl 2 (1:3 vs 2:4) → 3 body', wd2 === 3, 3, wd2);
+assert('Výsledek A + rozdíl 2 (1:3 vs 2:4) → 2 body', wd2 === 2, 2, wd2);
 
 const wd3 = calculatePoints(2, 2, 5, 5);
-assert('Remíza + rozdíl 0 (2:2 vs 5:5) → 3 body', wd3 === 3, 3, wd3);
+assert('Remíza + rozdíl 0 (2:2 vs 5:5) → 3 body (přesný? ne ale výsledek i rozdíl)', wd3 === 2, 2, wd3);
 
 // Pouze správný výsledek (rozdíl jiný) → 1 bod
 const winOnly1 = calculatePoints(5, 1, 3, 2);
@@ -66,23 +65,23 @@ assert('Pouze výsledek H (5:1 vs 3:2) → 1 bod', winOnly1 === 1, 1, winOnly1);
 const winOnly2 = calculatePoints(0, 4, 1, 2);
 assert('Pouze výsledek A (0:4 vs 1:2) → 1 bod', winOnly2 === 1, 1, winOnly2);
 
-const drawOnly = calculatePoints(1, 1, 3, 3);
-assert('Pouze remíza (1:1 vs 3:3) → 3 body (oba výsledek i rozdíl 0)', drawOnly === 3, 3, drawOnly);
-
-// Pouze správný rozdíl (výsledek opačný) → 2 body
+// Špatný výsledek i kdyby rozdíl seděl → 0 bodů
 const diffOnly1 = calculatePoints(4, 2, 1, 3);
-assert('Pouze rozdíl (4:2 vs 1:3, oba rozdíl 2, opačný winner) → 2 body', diffOnly1 === 2, 2, diffOnly1);
+assert('ŠPATNÝ výsledek + správný rozdíl (4:2 vs 1:3, oba rozdíl 2) → 0 bodů', diffOnly1 === 0, 0, diffOnly1);
 
 const diffOnly2 = calculatePoints(2, 5, 5, 2);
-assert('Pouze rozdíl (2:5 vs 5:2, oba rozdíl 3, opačný winner) → 2 body', diffOnly2 === 2, 2, diffOnly2);
+assert('ŠPATNÝ výsledek + správný rozdíl (2:5 vs 5:2) → 0 bodů', diffOnly2 === 0, 0, diffOnly2);
 
 // 0 bodů
 const zero1 = calculatePoints(5, 0, 1, 4);
 assert('0 bodů (5:0 vs 1:4, vše špatně)', calculatePoints(5, 0, 1, 4) === 0, 0, zero1);
 
-// Edge case z reálu (Švédsko-test)
-const real1 = calculatePoints(3, 6, 2, 5);
-assert('Reálný případ: tip 3:6, výsledek 2:5 → 3 body (A win + rozdíl 3)', real1 === 3, 3, real1);
+// Reálný případ — uživatelův příklad
+const userEx1 = calculatePoints(4, 2, 3, 1);
+assert('Uživatelův příklad: tip 4:2, real 3:1 (správný výsledek+rozdíl) → 2 body', userEx1 === 2, 2, userEx1);
+
+const userEx2 = calculatePoints(4, 2, 1, 3);
+assert('Uživatelův příklad: tip 4:2, real 1:3 (opačný winner) → 0 bodů', userEx2 === 0, 0, userEx2);
 
 // ============================================================
 // 2. HTML PARSER (lokální test)
@@ -195,8 +194,8 @@ const users = [
 ];
 
 const expected = {
-  'Alice': 3, 'Bob': 3, 'Carl': 3, 'Dana': 3,
-  'Eve': 1, 'Frank': 0, 'Greg': 0, 'Helen': 2,
+  'Alice': 3, 'Bob': 2, 'Carl': 2, 'Dana': 2,
+  'Eve': 1, 'Frank': 0, 'Greg': 0, 'Helen': 0,
 };
 
 for (const u of users) {

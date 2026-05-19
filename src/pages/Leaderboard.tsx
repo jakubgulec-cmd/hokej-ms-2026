@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 interface Row {
   id: string;
   username: string;
+  note: string | null;
   total_points: number;
   matches_predicted: number;
 }
@@ -74,6 +75,9 @@ export default function Leaderboard() {
                   <td className="px-5 py-4">
                     <span className={isMe ? 'text-blue-400 font-semibold' : ''}>{row.username}</span>
                     {isMe && <span className="text-xs text-slate-500 ml-2">(ty)</span>}
+                    {row.note && (
+                      <span className="text-xs text-slate-500 ml-2 italic">({row.note})</span>
+                    )}
                   </td>
                   <td className="px-5 py-4 text-right text-slate-400 text-sm">
                     {row.matches_predicted}

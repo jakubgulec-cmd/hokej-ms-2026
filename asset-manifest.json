@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/hokej-ms-2026/static/css/main.5a3c5b32.css",
-    "main.js": "/hokej-ms-2026/static/js/main.2338d531.js",
+    "main.js": "/hokej-ms-2026/static/js/main.b27be1b7.js",
     "index.html": "/hokej-ms-2026/index.html",
     "main.5a3c5b32.css.map": "/hokej-ms-2026/static/css/main.5a3c5b32.css.map",
-    "main.2338d531.js.map": "/hokej-ms-2026/static/js/main.2338d531.js.map"
+    "main.b27be1b7.js.map": "/hokej-ms-2026/static/js/main.b27be1b7.js.map"
   },
   "entrypoints": [
     "static/css/main.5a3c5b32.css",
-    "static/js/main.2338d531.js"
+    "static/js/main.b27be1b7.js"
   ]
 }

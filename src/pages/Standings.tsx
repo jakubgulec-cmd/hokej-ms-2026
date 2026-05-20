@@ -30,13 +30,13 @@ function Flag({ code }: { code: string }) {
 }
 
 const COLS: { key: keyof Standing; label: string; title: string }[] = [
+  { key: 'points', label: 'Body', title: 'Body' },
+  { key: 'score', label: 'Skóre', title: 'Celkové skóre' },
   { key: 'games', label: 'Zápasy', title: 'Zápasy' },
   { key: 'wins', label: 'Výhry', title: 'Výhry' },
   { key: 'ot_wins', label: 'Výhry v prodloužení', title: 'Výhry v prodloužení' },
   { key: 'ot_losses', label: 'Prohry v prodloužení', title: 'Prohry v prodloužení' },
   { key: 'losses', label: 'Prohry', title: 'Prohry' },
-  { key: 'score', label: 'Skóre', title: 'Celkové skóre' },
-  { key: 'points', label: 'Body', title: 'Body' },
   { key: 'shots_per_game', label: 'Střely', title: 'Průměr střel na branku za zápas' },
   { key: 'pp_pct', label: 'Proměněné přesilovky', title: 'Využití přesilovek [%]' },
   { key: 'pk_pct', label: 'Ubráněná oslabení', title: 'Ubráněná oslabení [%]' },

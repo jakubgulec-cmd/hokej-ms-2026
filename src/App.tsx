@@ -5,6 +5,7 @@ import Auth from './pages/Auth';
 import Matches from './pages/Matches';
 import Leaderboard from './pages/Leaderboard';
 import Predictions from './pages/Predictions';
+import Standings from './pages/Standings';
 import Rules from './pages/Rules';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ function AppRoutes() {
         <Route path="/" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
         <Route path="/tipy" element={<ProtectedRoute><Predictions /></ProtectedRoute>} />
+        <Route path="/tabulka" element={<ProtectedRoute><Standings /></ProtectedRoute>} />
         <Route path="/pravidla" element={<ProtectedRoute><Rules /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

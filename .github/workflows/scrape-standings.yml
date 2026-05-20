@@ -1,0 +1,32 @@
+name: Scrape Standings
+
+on:
+  schedule:
+    # Denně ve 3:00 českého času (CEST = UTC+2 → 1:00 UTC)
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: scrape-standings
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js --no-audit --no-fund
+        working-directory: ./scripts
+
+      - name: Run standings scraper
+        run: node scripts/scrape-standings.js
+        env:
+          SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

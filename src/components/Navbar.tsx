@@ -11,6 +11,7 @@ export default function Navbar() {
     { to: '/', label: 'Zápasy' },
     { to: '/leaderboard', label: 'Výsledky' },
     { to: '/tipy', label: 'Tipy' },
+    { to: '/tabulka', label: 'Tabulka' },
     { to: '/pravidla', label: 'Pravidla' },
   ];
 

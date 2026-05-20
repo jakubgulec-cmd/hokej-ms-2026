@@ -10,6 +10,7 @@ export default function Navbar() {
   const navItems = [
     { to: '/', label: 'Zápasy' },
     { to: '/leaderboard', label: 'Výsledky' },
+    { to: '/tipy', label: 'Tipy' },
     { to: '/pravidla', label: 'Pravidla' },
   ];
 

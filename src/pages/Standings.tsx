@@ -30,17 +30,17 @@ function Flag({ code }: { code: string }) {
 }
 
 const COLS: { key: keyof Standing; label: string; title: string }[] = [
-  { key: 'games', label: 'Z', title: 'Zápasy' },
-  { key: 'wins', label: 'V', title: 'Výhry' },
-  { key: 'ot_wins', label: 'VP', title: 'Výhry v prodloužení' },
-  { key: 'ot_losses', label: 'PP', title: 'Prohry v prodloužení' },
-  { key: 'losses', label: 'P', title: 'Prohry' },
+  { key: 'games', label: 'Zápasy', title: 'Zápasy' },
+  { key: 'wins', label: 'Výhry', title: 'Výhry' },
+  { key: 'ot_wins', label: 'Výhry v prodloužení', title: 'Výhry v prodloužení' },
+  { key: 'ot_losses', label: 'Prohry v prodloužení', title: 'Prohry v prodloužení' },
+  { key: 'losses', label: 'Prohry', title: 'Prohry' },
   { key: 'score', label: 'Skóre', title: 'Celkové skóre' },
-  { key: 'points', label: 'B', title: 'Body' },
-  { key: 'shots_per_game', label: 'SB', title: 'Průměr střel na branku za zápas' },
-  { key: 'pp_pct', label: 'VPř', title: 'Využití přesilovek [%]' },
-  { key: 'pk_pct', label: 'UOs', title: 'Ubráněná oslabení [%]' },
-  { key: 'penalty_min', label: 'T', title: 'Trestné minuty' },
+  { key: 'points', label: 'Body', title: 'Body' },
+  { key: 'shots_per_game', label: 'Střely', title: 'Průměr střel na branku za zápas' },
+  { key: 'pp_pct', label: 'Proměněné přesilovky', title: 'Využití přesilovek [%]' },
+  { key: 'pk_pct', label: 'Ubráněná oslabení', title: 'Ubráněná oslabení [%]' },
+  { key: 'penalty_min', label: 'Trestné minuty', title: 'Trestné minuty' },
 ];
 
 function GroupTable({ group, rows }: { group: string; rows: Standing[] }) {
@@ -133,12 +133,6 @@ export default function Standings() {
         <>
           <GroupTable group="B" rows={groupB} />
           <GroupTable group="A" rows={groupA} />
-
-          <div className="mt-4 bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-xs text-slate-500 leading-relaxed">
-            <strong className="text-slate-400">Legenda:</strong> Z = zápasy, V = výhry, VP = výhry v prodloužení,
-            PP = prohry v prodloužení, P = prohry, B = body, SB = průměr střel na branku/zápas,
-            VPř = využití přesilovek [%], UOs = ubráněná oslabení [%], T = trestné minuty
-          </div>
         </>
       )}
     </div>

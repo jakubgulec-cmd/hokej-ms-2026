@@ -115,8 +115,8 @@ export default function Predictions() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2">Tipy</h1>
-      <p className="text-sm text-slate-400 mb-6">Jak kdo tipoval u už začatých zápasů</p>
+      <h1 className="text-2xl font-bold mb-2">Tipy hráčů</h1>
+      <p className="text-sm text-slate-400 mb-6">Porovnání tipů všech hráčů. Tipy se odkryjí až po začátku zápasu.</p>
 
       {groups.length === 0 && (
         <p className="text-center text-slate-500 py-12">Zatím žádné začaté zápasy s tipy</p>

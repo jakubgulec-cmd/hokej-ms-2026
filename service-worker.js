@@ -1,8 +1,8 @@
 // Service Worker pro PWA — minimální offline cache pro shell
-const CACHE_NAME = 'hokej-tipovacka-v5';
+const CACHE_NAME = 'hokej-tipovacka-v6';
+// index.html záměrně NENÍ v cache — vždy se načítá ze sítě,
+// aby se změny v JS bundlech projevily okamžitě
 const APP_SHELL = [
-  './',
-  './index.html',
   './manifest.json',
   './apple-touch-icon.png',
   './icon-192.png',
@@ -31,7 +31,15 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Statika: network first, fallback na cache
+  // Navigace (index.html): vždy ze sítě — žádná cache, aby se změny projevily hned
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Statika (JS/CSS/obrázky): network first, fallback na cache
   event.respondWith(
     fetch(request)
       .then(response => {

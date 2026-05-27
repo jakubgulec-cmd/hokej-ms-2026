@@ -72,18 +72,15 @@ function parseResult(html, dbHomeTeam, dbAwayTeam) {
 }
 
 function calculatePoints(predH, predA, realH, realA) {
-  // Přesný tip → +9
-  if (predH === realH && predA === realA) return 9;
+  // Vrací základní skóre 3/2/1/0 (skupina), playoff se mapuje zvlášť
+  if (predH === realH && predA === realA) return 3;
 
-  // Správný výsledek? (kdo vyhrál)
   const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
   const realResult = realH > realA ? 'H' : realH < realA ? 'A' : 'D';
 
-  // Špatný výsledek → 0 (i když by rozdíl náhodou souhlasil)
   if (predResult !== realResult) return 0;
 
-  // Správný výsledek — kontroluj rozdíl
-  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 4; // Výsledek + rozdíl
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 2; // Výsledek + rozdíl
   return 1; // Jen výsledek
 }
 
@@ -173,10 +170,12 @@ async function main() {
       if (updateError) { console.error('Update error:', updateError); continue; }
       console.log(`✅ Finální: ${result.homeGoals}:${result.awayGoals}`);
 
-      // Vypočítej body pro všechny tipy (playoff = 2×)
+      // Vypočítej body pro všechny tipy
+      // Skupina: 3/2/1/0  |  Playoff (ČF/SF/bronz/finále): 9/4/1/0
       const PLAYOFF_ROUNDS = ['QF', 'SF', 'bronze', 'final'];
-      const pointsMult = PLAYOFF_ROUNDS.includes(match.round) ? 2 : 1;
-      if (pointsMult > 1) console.log(`🏆 Playoff zápas — body ×${pointsMult}`);
+      const isPlayoff = PLAYOFF_ROUNDS.includes(match.round);
+      const PLAYOFF_PTS = [0, 1, 4, 9]; // index = base (0/1/2/3) → playoff 0/1/4/9
+      if (isPlayoff) console.log(`🏆 Playoff zápas — bodování 9/4/1`);
 
       const { data: preds } = await supabase
         .from('predictions')
@@ -185,7 +184,8 @@ async function main() {
 
       if (preds && preds.length > 0) {
         for (const pred of preds) {
-          const pts = calculatePoints(pred.home_goals, pred.away_goals, result.homeGoals, result.awayGoals) * pointsMult;
+          const base = calculatePoints(pred.home_goals, pred.away_goals, result.homeGoals, result.awayGoals);
+          const pts = isPlayoff ? PLAYOFF_PTS[base] : base;
           await supabase
             .from('predictions')
             .update({ points: pts, locked: true })

@@ -30,7 +30,7 @@ export default function Rules() {
       </div>
 
       <div className="bg-slate-800 border border-amber-700/40 rounded-xl p-5 mt-4">
-        <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-1">🏆 Playoff — dvojnásobné body</h2>
+        <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-1">🏆 Playoff — zvýšené body</h2>
         <p className="text-xs text-slate-400 mb-4">Čtvrtfinále, semifinále, zápas o bronz, finále</p>
         <div className="space-y-3 text-sm">
           <div className="flex justify-between items-center">

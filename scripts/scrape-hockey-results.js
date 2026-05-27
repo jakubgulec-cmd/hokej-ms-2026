@@ -72,8 +72,8 @@ function parseResult(html, dbHomeTeam, dbAwayTeam) {
 }
 
 function calculatePoints(predH, predA, realH, realA) {
-  // Přesný tip → +3
-  if (predH === realH && predA === realA) return 3;
+  // Přesný tip → +9
+  if (predH === realH && predA === realA) return 9;
 
   // Správný výsledek? (kdo vyhrál)
   const predResult = predH > predA ? 'H' : predH < predA ? 'A' : 'D';
@@ -83,7 +83,7 @@ function calculatePoints(predH, predA, realH, realA) {
   if (predResult !== realResult) return 0;
 
   // Správný výsledek — kontroluj rozdíl
-  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 2; // Výsledek + rozdíl
+  if (Math.abs(predH - predA) === Math.abs(realH - realA)) return 4; // Výsledek + rozdíl
   return 1; // Jen výsledek
 }
 

@@ -8,11 +8,11 @@ export default function Rules() {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between items-center">
             <span>Přesný tip (např. 4:2 → 4:2)</span>
-            <span className="text-yellow-400 font-bold whitespace-nowrap">+3 body</span>
+            <span className="text-yellow-400 font-bold whitespace-nowrap">+9 bodů</span>
           </div>
           <div className="flex justify-between items-center">
             <span>Správný výsledek + správný rozdíl<br /><span className="text-xs text-slate-500">(např. tip 4:2 → reálně 3:1)</span></span>
-            <span className="text-blue-400 font-bold whitespace-nowrap">+2 body</span>
+            <span className="text-blue-400 font-bold whitespace-nowrap">+4 body</span>
           </div>
           <div className="flex justify-between items-center">
             <span>Pouze správný výsledek (výhra / prohra)</span>
@@ -35,11 +35,11 @@ export default function Rules() {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between items-center">
             <span>Přesný tip</span>
-            <span className="text-yellow-400 font-bold whitespace-nowrap">+6 bodů</span>
+            <span className="text-yellow-400 font-bold whitespace-nowrap">+18 bodů</span>
           </div>
           <div className="flex justify-between items-center">
             <span>Správný výsledek + správný rozdíl</span>
-            <span className="text-blue-400 font-bold whitespace-nowrap">+4 body</span>
+            <span className="text-blue-400 font-bold whitespace-nowrap">+8 bodů</span>
           </div>
           <div className="flex justify-between items-center">
             <span>Pouze správný výsledek</span>

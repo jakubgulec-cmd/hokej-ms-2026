@@ -54,13 +54,28 @@ function Flag({ code, size = 52 }: { code: string; size?: number }) {
   );
 }
 
+function bodyStr(pts: number): string {
+  if (pts === 1) return '1 bod';
+  if (pts <= 4) return `${pts} body`;
+  return `${pts} bodů`;
+}
+
+const PLAYOFF_ROUNDS = ['QF', 'SF', 'bronze', 'final'];
+
 function getPointsLabel(pred: Prediction, match: Match) {
-  const p = pred.points;
+  const mult = PLAYOFF_ROUNDS.includes(match.round ?? '') ? 2 : 1;
+
   const isExact = pred.home_goals === match.home_goals && pred.away_goals === match.away_goals;
-  if (isExact) return { text: 'Přesný tip', sub: '+3 body', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-700/50' };
-  if (p === 2) return { text: 'Výsledek + rozdíl', sub: '+2 body', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
-  if (p === 1) return { text: 'Správný výsledek', sub: '+1 bod', color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
-  return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-500', bg: 'bg-slate-700/30 border-slate-700' };
+  if (isExact) return { text: 'Přesný tip', sub: `+${bodyStr(3 * mult)}`, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-700/50' };
+
+  const predWin = pred.home_goals > pred.away_goals ? 'H' : 'A';
+  const realWin = (match.home_goals ?? 0) > (match.away_goals ?? 0) ? 'H' : 'A';
+  if (predWin !== realWin) return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-500', bg: 'bg-slate-700/30 border-slate-700' };
+
+  const correctDiff = Math.abs(pred.home_goals - pred.away_goals) === Math.abs((match.home_goals ?? 0) - (match.away_goals ?? 0));
+  if (correctDiff) return { text: 'Výsledek + rozdíl', sub: `+${bodyStr(2 * mult)}`, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
+
+  return { text: 'Správný výsledek', sub: `+${bodyStr(mult)}`, color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
 }
 
 function formatDate(date: Date) {

@@ -97,7 +97,7 @@ async function main() {
   const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString();
   const { data: matches, error } = await supabase
     .from('matches')
-    .select('id, home_team, away_team, match_date, status, hokej_cz_id, home_goals, away_goals')
+    .select('id, home_team, away_team, match_date, status, hokej_cz_id, home_goals, away_goals, round')
     .or(`status.neq.finished,match_date.gte.${twelveHoursAgo}`);
 
   if (error) {
@@ -173,7 +173,11 @@ async function main() {
       if (updateError) { console.error('Update error:', updateError); continue; }
       console.log(`✅ Finální: ${result.homeGoals}:${result.awayGoals}`);
 
-      // Vypočítej body pro všechny tipy
+      // Vypočítej body pro všechny tipy (playoff = 2×)
+      const PLAYOFF_ROUNDS = ['QF', 'SF', 'bronze', 'final'];
+      const pointsMult = PLAYOFF_ROUNDS.includes(match.round) ? 2 : 1;
+      if (pointsMult > 1) console.log(`🏆 Playoff zápas — body ×${pointsMult}`);
+
       const { data: preds } = await supabase
         .from('predictions')
         .select('id, home_goals, away_goals')
@@ -181,7 +185,7 @@ async function main() {
 
       if (preds && preds.length > 0) {
         for (const pred of preds) {
-          const pts = calculatePoints(pred.home_goals, pred.away_goals, result.homeGoals, result.awayGoals);
+          const pts = calculatePoints(pred.home_goals, pred.away_goals, result.homeGoals, result.awayGoals) * pointsMult;
           await supabase
             .from('predictions')
             .update({ points: pts, locked: true })

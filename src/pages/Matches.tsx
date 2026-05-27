@@ -15,6 +15,7 @@ interface Match {
   live_away_goals: number | null;
   status: string;
   group: string | null;
+  round: string | null;
 }
 
 interface Prediction {
@@ -27,6 +28,16 @@ interface Prediction {
 }
 
 function Flag({ code, size = 52 }: { code: string; size?: number }) {
+  if (code === 'xx') {
+    return (
+      <div
+        style={{ width: size, height: Math.round(size * 0.67), borderRadius: 6, flexShrink: 0 }}
+        className="bg-slate-700 border border-slate-600 flex items-center justify-center"
+      >
+        <span className="text-slate-500 text-xs font-bold">?</span>
+      </div>
+    );
+  }
   return (
     <img
       src={`${process.env.PUBLIC_URL}/flags/${code}.png`}
@@ -60,7 +71,14 @@ function formatDate(date: Date) {
   return `${dayCap} ${rest} • ${time}`;
 }
 
-type FilterType = 'all' | 'cz' | 'upcoming' | 'finished';
+type FilterType = 'playoff' | 'all' | 'cz' | 'upcoming' | 'finished';
+
+const ROUND_LABELS: Record<string, string> = {
+  QF: 'Čtvrtfinále',
+  SF: 'Semifinále',
+  bronze: 'Zápas o bronz',
+  final: 'Finále',
+};
 
 export default function Matches() {
   const { user } = useAuth();
@@ -70,7 +88,7 @@ export default function Matches() {
   const [saving, setSaving] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>('cz');
+  const [filter, setFilter] = useState<FilterType>('playoff');
 
   useEffect(() => {
     if (!user) return;
@@ -170,6 +188,7 @@ export default function Matches() {
 
   const filteredMatches = useMemo(() => {
     return matches.filter(m => {
+      if (filter === 'playoff') return m.round === 'QF' || m.round === 'SF' || m.round === 'bronze' || m.round === 'final';
       if (filter === 'cz') return m.home_code === 'cz' || m.away_code === 'cz';
       if (filter === 'upcoming') return m.status === 'upcoming' && !isLocked(m.match_date);
       if (filter === 'finished') return m.status === 'finished';
@@ -211,6 +230,7 @@ export default function Matches() {
       {/* Filtry */}
       <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
         {[
+          { id: 'playoff' as FilterType, label: '🏆 Play off' },
           { id: 'cz' as FilterType, label: 'Česko' },
           { id: 'all' as FilterType, label: 'Vše' },
           { id: 'upcoming' as FilterType, label: 'K tipování' },
@@ -240,8 +260,10 @@ export default function Matches() {
           const locked = isLocked(match.match_date);
           const finished = match.status === 'finished';
           const live = match.status === 'ongoing' && match.live_home_goals !== null;
+          const isTbd = match.home_team === 'TBD' || match.away_team === 'TBD';
           const inp = inputs[match.id] || { h: '', a: '' };
           const date = new Date(match.match_date);
+          const roundLabel = match.round ? ROUND_LABELS[match.round] : null;
 
           // Status badge
           let statusBadge = null;
@@ -267,9 +289,16 @@ export default function Matches() {
             >
               {/* TOP BAR — datum vlevo, status vpravo */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 bg-slate-800/50">
-                <p className="text-xs font-medium text-slate-400">
-                  {formatDate(date)}
-                </p>
+                <div className="flex items-center gap-2 min-w-0">
+                  {roundLabel && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-600/20 text-amber-400 border border-amber-700/50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
+                      {roundLabel}
+                    </span>
+                  )}
+                  <p className="text-xs font-medium text-slate-400 truncate">
+                    {formatDate(date)}
+                  </p>
+                </div>
                 {statusBadge}
               </div>
 
@@ -294,14 +323,18 @@ export default function Matches() {
                   {/* Hlavička HOME (vlevo zarovnaná s inputem) */}
                   <div className="flex items-center gap-2 min-w-0">
                     <Flag code={match.home_code} size={48} />
-                    <span className="font-bold text-sm truncate">{match.home_team}</span>
+                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-500 italic' : ''}`}>
+                      {match.home_team === 'TBD' ? '?' : match.home_team}
+                    </span>
                   </div>
 
                   <div /> {/* mezera pro ":" */}
 
                   {/* Hlavička AWAY (vpravo zarovnaná s inputem) */}
                   <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <span className="font-bold text-sm truncate">{match.away_team}</span>
+                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-500 italic' : ''}`}>
+                      {match.away_team === 'TBD' ? '?' : match.away_team}
+                    </span>
                     <Flag code={match.away_code} size={48} />
                   </div>
 
@@ -313,6 +346,10 @@ export default function Matches() {
                   ) : live ? (
                     <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
                       <span className="text-3xl font-bold">{match.live_home_goals}</span>
+                    </div>
+                  ) : isTbd ? (
+                    <div className="h-16 bg-slate-900/30 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-slate-700 text-2xl">—</span>
                     </div>
                   ) : (
                     <input
@@ -341,6 +378,10 @@ export default function Matches() {
                     <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
                       <span className="text-3xl font-bold">{match.live_away_goals}</span>
                     </div>
+                  ) : isTbd ? (
+                    <div className="h-16 bg-slate-900/30 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-slate-700 text-2xl">—</span>
+                    </div>
                   ) : (
                     <input
                       type="number"
@@ -354,8 +395,8 @@ export default function Matches() {
                     />
                   )}
 
-                  {/* TLAČÍTKO TIPUJ — pod prvním inputem, jen pro upcoming */}
-                  {!finished && !live && (
+                  {/* TLAČÍTKO TIPUJ — pod prvním inputem, jen pro upcoming a ne-TBD */}
+                  {!finished && !live && !isTbd && (
                     <>
                       <button
                         onClick={() => handleSave(match.id)}
@@ -373,6 +414,13 @@ export default function Matches() {
                     </>
                   )}
                 </div>
+
+                {/* TBD zpráva */}
+                {isTbd && (
+                  <p className="text-center text-xs text-slate-500 italic mt-3">
+                    Soupeři budou známi po čtvrtfinále
+                  </p>
+                )}
 
                 {/* TVŮJ TIP — pro finished s body */}
                 {finished && pred && (
@@ -409,7 +457,7 @@ export default function Matches() {
                 )}
 
                 {/* Aktuální tip info pro upcoming */}
-                {!finished && !live && pred && (
+                {!finished && !live && !isTbd && pred && (
                   <p className="text-xs text-slate-500 mt-3">
                     Aktuální tip: <span className="text-slate-300 font-medium">{pred.home_goals} : {pred.away_goals}</span>
                   </p>

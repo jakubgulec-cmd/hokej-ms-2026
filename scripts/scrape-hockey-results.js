@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-const MIN_WAIT_MINUTES = 95;
+const MIN_WAIT_MINUTES = 65;
 
 function fetchUrl(url) {
   return new Promise((resolve, reject) => {
@@ -127,6 +127,11 @@ async function main() {
 
     if (!match.hokej_cz_id) {
       console.log(`⚠️  Chybí hokej_cz_id`);
+      continue;
+    }
+
+    if (match.home_team === 'TBD' || match.away_team === 'TBD') {
+      console.log(`⏭️  Tým zatím neznámý (TBD), přeskakuji`);
       continue;
     }
 

@@ -31,6 +31,7 @@ jobs:
           while [ $SECONDS -lt $end ]; do
             echo "═══ Iteration $iter at $(date -u +%H:%M:%S) UTC ═══"
             node scripts/scrape-hockey-results.js || echo "Iteration failed, continuing..."
+            node scripts/update-playoff-teams.js || echo "Playoff update failed, continuing..."
             iter=$((iter+1))
             sleep 60
           done

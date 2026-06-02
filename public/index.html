@@ -38,9 +38,22 @@
     <div id="root"></div>
     <script>
       if ('serviceWorker' in navigator) {
+        // Když nový service worker převezme kontrolu, přenačti stránku
+        // (záloha k self-reloadu uvnitř SW pro prohlížeče bez client.navigate)
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js')
-            .then(reg => console.log('SW registered:', reg.scope))
+            .then(reg => {
+              console.log('SW registered:', reg.scope);
+              reg.update();
+              // Pravidelně kontroluj novou verzi (každou minutu)
+              setInterval(() => reg.update(), 60000);
+            })
             .catch(err => console.warn('SW registration failed:', err));
         });
       }

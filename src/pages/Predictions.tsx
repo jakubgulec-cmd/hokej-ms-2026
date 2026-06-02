@@ -46,11 +46,36 @@ function Flag({ code, size = 28 }: { code: string; size?: number }) {
   );
 }
 
-function pointsBadge(points: number) {
-  if (points === 3) return { text: '+3', color: 'text-yellow-400' };
-  if (points === 2) return { text: '+2', color: 'text-blue-400' };
-  if (points === 1) return { text: '+1', color: 'text-green-400' };
-  return { text: '0', color: 'text-slate-600' };
+// Barvu odvozujeme z reálného výsledku tipu (funguje pro skupinu 3/2/1
+// i playoff 9/4/1), text zobrazuje skutečně udělené body z DB.
+function pointsBadge(
+  tip: { pred_home: number; pred_away: number; points: number },
+  realHome: number | null,
+  realAway: number | null
+) {
+  const pts = tip.points;
+  const text = pts > 0 ? `+${pts}` : '0';
+
+  if (pts === 0 || realHome === null || realAway === null) {
+    return { text, color: 'text-slate-600' };
+  }
+
+  // Přesný tip
+  if (tip.pred_home === realHome && tip.pred_away === realAway) {
+    return { text, color: 'text-yellow-400' };
+  }
+
+  const predWin = tip.pred_home > tip.pred_away ? 'H' : 'A';
+  const realWin = realHome > realAway ? 'H' : 'A';
+  if (predWin !== realWin) return { text, color: 'text-slate-600' };
+
+  // Správný výsledek + rozdíl
+  if (Math.abs(tip.pred_home - tip.pred_away) === Math.abs(realHome - realAway)) {
+    return { text, color: 'text-blue-400' };
+  }
+
+  // Jen správný výsledek
+  return { text, color: 'text-green-400' };
 }
 
 function formatDate(date: Date) {
@@ -162,7 +187,7 @@ export default function Predictions() {
               <div className="divide-y divide-slate-700/50">
                 {g.tips.map(t => {
                   const isMe = user?.id === t.user_id;
-                  const badge = pointsBadge(t.points);
+                  const badge = pointsBadge(t, g.home_goals, g.away_goals);
                   return (
                     <div
                       key={t.user_id}

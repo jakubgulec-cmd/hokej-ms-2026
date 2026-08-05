@@ -46,11 +46,11 @@ const COLS: { key: keyof Standing; label: string; title: string }[] = [
 function GroupTable({ group, rows }: { group: string; rows: Standing[] }) {
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-bold mb-3">Skupina {group}</h2>
-      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-x-auto">
+      <h2 className="text-lg font-bold text-white mb-3">Skupina {group}</h2>
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-700/60 text-slate-400">
+            <tr className="bg-slate-950/40 text-slate-400">
               <th className="px-2 py-2.5 text-left font-medium">#</th>
               <th className="px-2 py-2.5 text-left font-medium">Tým</th>
               {COLS.map(c => (
@@ -60,16 +60,16 @@ function GroupTable({ group, rows }: { group: string; rows: Standing[] }) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/50">
+          <tbody className="divide-y divide-slate-800">
             {rows.map(r => {
               const isCzech = r.team_code === 'cz';
               return (
-                <tr key={r.team} className={isCzech ? 'bg-blue-900/20' : 'hover:bg-slate-700/30'}>
-                  <td className="px-2 py-2.5 text-slate-500">{r.rank}</td>
+                <tr key={r.team} className={isCzech ? 'bg-sky-400/10' : 'hover:bg-slate-800/50'}>
+                  <td className="px-2 py-2.5 text-slate-400">{r.rank}</td>
                   <td className="px-2 py-2.5">
                     <div className="flex items-center gap-2">
                       <Flag code={r.team_code} />
-                      <span className={`font-medium whitespace-nowrap ${isCzech ? 'text-blue-400' : ''}`}>
+                      <span className={`font-medium whitespace-nowrap ${isCzech ? 'text-sky-300' : 'text-slate-100'}`}>
                         {r.team}
                       </span>
                     </div>
@@ -78,7 +78,7 @@ function GroupTable({ group, rows }: { group: string; rows: Standing[] }) {
                     <td
                       key={c.key}
                       className={`px-2 py-2.5 text-center whitespace-nowrap tabular-nums ${
-                        c.key === 'points' ? 'font-bold' : 'text-slate-300'
+                        c.key === 'points' ? 'font-bold text-white' : 'text-slate-200'
                       }`}
                     >
                       {r[c.key]}
@@ -124,11 +124,11 @@ export default function Standings() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2">Tabulka skupin</h1>
-      <p className="text-sm text-slate-400 mb-6">Aktualizuje se každý den ve 3:00. Zdroj: hokej.cz</p>
+      <h1 className="text-2xl font-bold text-white mb-2">Tabulka skupin</h1>
+      <p className="text-sm text-slate-300 mb-6">Aktualizuje se každý den ve 3:00. Zdroj: hokej.cz</p>
 
       {rows.length === 0 ? (
-        <p className="text-center text-slate-500 py-12">Tabulka zatím není k dispozici</p>
+        <p className="text-center text-slate-400 py-12">Tabulka zatím není k dispozici</p>
       ) : (
         <>
           <GroupTable group="B" rows={groupB} />

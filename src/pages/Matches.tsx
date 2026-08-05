@@ -32,9 +32,9 @@ function Flag({ code, size = 52 }: { code: string; size?: number }) {
     return (
       <div
         style={{ width: size, height: Math.round(size * 0.67), borderRadius: 6, flexShrink: 0 }}
-        className="bg-slate-700 border border-slate-600 flex items-center justify-center"
+        className="bg-slate-800 border border-slate-700 flex items-center justify-center"
       >
-        <span className="text-slate-500 text-xs font-bold">?</span>
+        <span className="text-slate-400 text-xs font-bold">?</span>
       </div>
     );
   }
@@ -68,16 +68,16 @@ function getPointsLabel(pred: Prediction, match: Match) {
   const pts = isPlayoff ? [9, 4, 1] : [3, 2, 1]; // [přesný, diff, výsledek]
 
   const isExact = pred.home_goals === match.home_goals && pred.away_goals === match.away_goals;
-  if (isExact) return { text: 'Přesný tip', sub: `+${bodyStr(pts[0])}`, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-700/50' };
+  if (isExact) return { text: 'Přesný tip', sub: `+${bodyStr(pts[0])}`, color: 'text-yellow-300', bg: 'bg-yellow-400/10 border-yellow-400/30' };
 
   const predWin = pred.home_goals > pred.away_goals ? 'H' : 'A';
   const realWin = (match.home_goals ?? 0) > (match.away_goals ?? 0) ? 'H' : 'A';
-  if (predWin !== realWin) return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-500', bg: 'bg-slate-700/30 border-slate-700' };
+  if (predWin !== realWin) return { text: 'Bez bodů', sub: '0 bodů', color: 'text-slate-400', bg: 'bg-slate-800/60 border-slate-700' };
 
   const correctDiff = Math.abs(pred.home_goals - pred.away_goals) === Math.abs((match.home_goals ?? 0) - (match.away_goals ?? 0));
-  if (correctDiff) return { text: 'Výsledek + rozdíl', sub: `+${bodyStr(pts[1])}`, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-700/50' };
+  if (correctDiff) return { text: 'Výsledek + rozdíl', sub: `+${bodyStr(pts[1])}`, color: 'text-sky-300', bg: 'bg-sky-400/10 border-sky-400/30' };
 
-  return { text: 'Správný výsledek', sub: `+${bodyStr(pts[2])}`, color: 'text-green-400', bg: 'bg-green-500/10 border-green-700/50' };
+  return { text: 'Správný výsledek', sub: `+${bodyStr(pts[2])}`, color: 'text-green-300', bg: 'bg-green-400/10 border-green-400/30' };
 }
 
 function formatDate(date: Date) {
@@ -230,17 +230,17 @@ export default function Matches() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* Souhrn */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-3 text-center">
-          <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">K tipování</p>
-          <p className="text-2xl font-bold">{tippableCount}</p>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-3 text-center">
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">K tipování</p>
+          <p className="text-2xl font-bold text-white">{tippableCount}</p>
         </div>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-3 text-center">
-          <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Odehráno</p>
-          <p className="text-2xl font-bold">{finishedCount}</p>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-3 text-center">
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Odehráno</p>
+          <p className="text-2xl font-bold text-white">{finishedCount}</p>
         </div>
-        <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg px-3 py-3 text-center">
-          <p className="text-xs text-blue-300 uppercase tracking-wider mb-1">Tvé body</p>
-          <p className="text-2xl font-bold text-blue-300">{myPoints}</p>
+        <div className="bg-sky-400/10 border border-sky-400/30 rounded-xl px-3 py-3 text-center">
+          <p className="text-xs font-medium text-sky-300 uppercase tracking-wider mb-1">Tvé body</p>
+          <p className="text-2xl font-bold text-sky-300">{myPoints}</p>
         </div>
       </div>
 
@@ -258,8 +258,8 @@ export default function Matches() {
             onClick={() => setFilter(f.id)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap ${
               filter === f.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                ? 'bg-sky-400 text-slate-950 font-semibold'
+                : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-700'
             }`}
           >
             {f.label}
@@ -269,7 +269,7 @@ export default function Matches() {
 
       <div className="space-y-4">
         {filteredMatches.length === 0 && (
-          <p className="text-center text-slate-500 py-12">Žádné zápasy v této kategorii</p>
+          <p className="text-center text-slate-400 py-12">Žádné zápasy v této kategorii</p>
         )}
 
         {filteredMatches.map(match => {
@@ -285,7 +285,7 @@ export default function Matches() {
           // Status badge
           let statusBadge = null;
           if (finished) {
-            statusBadge = <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">Skončil</span>;
+            statusBadge = <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Skončil</span>;
           } else if (live) {
             statusBadge = (
               <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase text-red-400">
@@ -300,19 +300,19 @@ export default function Matches() {
           return (
             <div
               key={match.id}
-              className={`bg-slate-800 border rounded-2xl overflow-hidden transition ${
-                finished ? 'border-slate-700' : live ? 'border-red-800/60' : 'border-slate-700 hover:border-slate-600'
+              className={`bg-slate-900 border rounded-2xl overflow-hidden transition ${
+                finished ? 'border-slate-800' : live ? 'border-red-500/40' : 'border-slate-800 hover:border-slate-600'
               }`}
             >
               {/* TOP BAR — datum vlevo, status vpravo */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 bg-slate-800/50">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-950/40">
                 <div className="flex items-center gap-2 min-w-0">
                   {roundLabel && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-600/20 text-amber-400 border border-amber-700/50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-400/10 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
                       {roundLabel}
                     </span>
                   )}
-                  <p className="text-xs font-medium text-slate-400 truncate">
+                  <p className="text-xs font-medium text-slate-300 truncate">
                     {formatDate(date)}
                   </p>
                 </div>
@@ -329,7 +329,7 @@ export default function Matches() {
                 )}
 
                 {locked && !finished && !live && (
-                  <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-950/30 border border-amber-900/50 rounded-lg px-3 py-2 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-lg px-3 py-2 mb-3">
                     <span>🔒</span>
                     <span>Tipy jsou uzamčeny — zápas už začal</span>
                   </div>
@@ -340,7 +340,7 @@ export default function Matches() {
                   {/* Hlavička HOME (vlevo zarovnaná s inputem) */}
                   <div className="flex items-center gap-2 min-w-0">
                     <Flag code={match.home_code} size={48} />
-                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-500 italic' : ''}`}>
+                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-400 italic' : 'text-white'}`}>
                       {match.home_team === 'TBD' ? '?' : match.home_team}
                     </span>
                   </div>
@@ -349,7 +349,7 @@ export default function Matches() {
 
                   {/* Hlavička AWAY (vpravo zarovnaná s inputem) */}
                   <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-500 italic' : ''}`}>
+                    <span className={`font-bold text-sm truncate ${isTbd ? 'text-slate-400 italic' : 'text-white'}`}>
                       {match.away_team === 'TBD' ? '?' : match.away_team}
                     </span>
                     <Flag code={match.away_code} size={48} />
@@ -357,16 +357,16 @@ export default function Matches() {
 
                   {/* HODNOTA HOME */}
                   {finished ? (
-                    <div className="h-16 bg-slate-900/60 border border-slate-700/50 rounded-xl flex items-center justify-center">
-                      <span className="text-3xl font-bold">{match.home_goals}</span>
+                    <div className="h-16 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{match.home_goals}</span>
                     </div>
                   ) : live ? (
-                    <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
-                      <span className="text-3xl font-bold">{match.live_home_goals}</span>
+                    <div className="h-16 bg-red-500/10 border border-red-500/40 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{match.live_home_goals}</span>
                     </div>
                   ) : isTbd ? (
-                    <div className="h-16 bg-slate-900/30 border border-slate-800 rounded-xl flex items-center justify-center">
-                      <span className="text-slate-700 text-2xl">—</span>
+                    <div className="h-16 bg-slate-950/40 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-slate-600 text-2xl">—</span>
                     </div>
                   ) : (
                     <input
@@ -377,27 +377,27 @@ export default function Matches() {
                       onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, h: e.target.value } }))}
                       disabled={locked}
                       placeholder="—"
-                      className="h-16 w-full min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      className="h-16 w-full min-w-0 bg-slate-950/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
                     />
                   )}
 
                   {/* DVOJTEČKA — zarovnaná s inputy */}
                   <div className="h-16 flex items-center">
-                    <span className="text-slate-500 text-2xl font-light">:</span>
+                    <span className="text-slate-400 text-2xl font-light">:</span>
                   </div>
 
                   {/* HODNOTA AWAY */}
                   {finished ? (
-                    <div className="h-16 bg-slate-900/60 border border-slate-700/50 rounded-xl flex items-center justify-center">
-                      <span className="text-3xl font-bold">{match.away_goals}</span>
+                    <div className="h-16 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{match.away_goals}</span>
                     </div>
                   ) : live ? (
-                    <div className="h-16 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center">
-                      <span className="text-3xl font-bold">{match.live_away_goals}</span>
+                    <div className="h-16 bg-red-500/10 border border-red-500/40 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{match.live_away_goals}</span>
                     </div>
                   ) : isTbd ? (
-                    <div className="h-16 bg-slate-900/30 border border-slate-800 rounded-xl flex items-center justify-center">
-                      <span className="text-slate-700 text-2xl">—</span>
+                    <div className="h-16 bg-slate-950/40 border border-slate-800 rounded-xl flex items-center justify-center">
+                      <span className="text-slate-600 text-2xl">—</span>
                     </div>
                   ) : (
                     <input
@@ -408,7 +408,7 @@ export default function Matches() {
                       onChange={e => setInputs(prev => ({ ...prev, [match.id]: { ...inp, a: e.target.value } }))}
                       disabled={locked}
                       placeholder="—"
-                      className="h-16 w-full min-w-0 bg-slate-900/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      className="h-16 w-full min-w-0 bg-slate-950/60 border border-slate-700 hover:border-slate-600 rounded-xl px-3 text-white text-center text-2xl font-bold placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
                     />
                   )}
 
@@ -418,10 +418,10 @@ export default function Matches() {
                       <button
                         onClick={() => handleSave(match.id)}
                         disabled={locked || saving === match.id}
-                        className={`h-12 w-full font-semibold rounded-xl transition text-sm ${
+                        className={`h-12 w-full font-bold rounded-xl transition text-sm ${
                           savedFlash === match.id
-                            ? 'bg-green-600 text-white'
-                            : 'bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white'
+                            ? 'bg-green-500 text-slate-950'
+                            : 'bg-sky-400 hover:bg-sky-300 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-slate-950'
                         }`}
                       >
                         {savedFlash === match.id ? '✓ Uloženo' : saving === match.id ? '...' : pred ? 'Změnit tip' : 'Tipuj'}
@@ -434,7 +434,7 @@ export default function Matches() {
 
                 {/* TBD zpráva */}
                 {isTbd && (
-                  <p className="text-center text-xs text-slate-500 italic mt-3">
+                  <p className="text-center text-xs text-slate-400 italic mt-3">
                     Soupeři budou známi po čtvrtfinále
                   </p>
                 )}
@@ -445,7 +445,7 @@ export default function Matches() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Tvůj tip</p>
-                        <p className="font-bold text-lg">{pred.home_goals} : {pred.away_goals}</p>
+                        <p className="font-bold text-lg text-white">{pred.home_goals} : {pred.away_goals}</p>
                       </div>
                       <div className="text-right">
                         <p className={`text-xs font-medium ${getPointsLabel(pred, match).color}`}>
@@ -460,23 +460,23 @@ export default function Matches() {
                 )}
 
                 {finished && !pred && (
-                  <p className="text-sm text-slate-500 text-center mt-3">Tip jsi nevyplnil</p>
+                  <p className="text-sm text-slate-400 text-center mt-3">Tip jsi nevyplnil</p>
                 )}
 
                 {/* TVŮJ TIP — pro live */}
                 {live && pred && (
-                  <div className="mt-3 bg-slate-700/30 border border-slate-700/50 rounded-xl px-4 py-3">
+                  <div className="mt-3 bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-slate-400">Tvůj tip</span>
-                      <span className="font-bold">{pred.home_goals} : {pred.away_goals}</span>
+                      <span className="font-bold text-white">{pred.home_goals} : {pred.away_goals}</span>
                     </div>
                   </div>
                 )}
 
                 {/* Aktuální tip info pro upcoming */}
                 {!finished && !live && !isTbd && pred && (
-                  <p className="text-xs text-slate-500 mt-3">
-                    Aktuální tip: <span className="text-slate-300 font-medium">{pred.home_goals} : {pred.away_goals}</span>
+                  <p className="text-xs text-slate-400 mt-3">
+                    Aktuální tip: <span className="text-slate-100 font-semibold">{pred.home_goals} : {pred.away_goals}</span>
                   </p>
                 )}
               </div>

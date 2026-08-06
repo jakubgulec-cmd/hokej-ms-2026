@@ -9,10 +9,23 @@
 }
 
 body {
-  background-color: #0f172a;
-  color: #e2e8f0;
+  background-color: #020617;
+  /* Jemná ledová záře nahoře — dodává hloubku bez rušení obsahu */
+  background-image: radial-gradient(
+    70rem 45rem at 50% -12rem,
+    rgba(56, 189, 248, 0.09),
+    transparent 70%
+  );
+  background-attachment: fixed;
+  color: #f1f5f9;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(56, 189, 248, 0.35);
 }
 
 input[type='number']::-webkit-inner-spin-button,

@@ -57,25 +57,25 @@ function pointsBadge(
   const text = pts > 0 ? `+${pts}` : '0';
 
   if (pts === 0 || realHome === null || realAway === null) {
-    return { text, color: 'text-slate-600' };
+    return { text, color: 'text-slate-400' };
   }
 
   // Přesný tip
   if (tip.pred_home === realHome && tip.pred_away === realAway) {
-    return { text, color: 'text-yellow-400' };
+    return { text, color: 'text-yellow-300' };
   }
 
   const predWin = tip.pred_home > tip.pred_away ? 'H' : 'A';
   const realWin = realHome > realAway ? 'H' : 'A';
-  if (predWin !== realWin) return { text, color: 'text-slate-600' };
+  if (predWin !== realWin) return { text, color: 'text-slate-400' };
 
   // Správný výsledek + rozdíl
   if (Math.abs(tip.pred_home - tip.pred_away) === Math.abs(realHome - realAway)) {
-    return { text, color: 'text-blue-400' };
+    return { text, color: 'text-sky-300' };
   }
 
   // Jen správný výsledek
-  return { text, color: 'text-green-400' };
+  return { text, color: 'text-green-300' };
 }
 
 function formatDate(date: Date) {
@@ -140,11 +140,11 @@ export default function Predictions() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2">Tipy hráčů</h1>
-      <p className="text-sm text-slate-400 mb-6">Porovnání tipů všech hráčů. Tipy se odkryjí až po začátku zápasu.</p>
+      <h1 className="text-2xl font-bold text-white mb-2">Tipy hráčů</h1>
+      <p className="text-sm text-slate-300 mb-6">Porovnání tipů všech hráčů. Tipy se odkryjí až po začátku zápasu.</p>
 
       {groups.length === 0 && (
-        <p className="text-center text-slate-500 py-12">Zatím žádné začaté zápasy s tipy</p>
+        <p className="text-center text-slate-400 py-12">Zatím žádné začaté zápasy s tipy</p>
       )}
 
       <div className="space-y-4">
@@ -158,46 +158,46 @@ export default function Predictions() {
             : '– : –';
 
           return (
-            <div key={g.match_id} className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
+            <div key={g.match_id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
               {/* Hlavička zápasu */}
-              <div className="px-4 py-3 border-b border-slate-700/60 bg-slate-800/50">
+              <div className="px-4 py-3 border-b border-slate-800 bg-slate-950/40">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400">{formatDate(new Date(g.match_date))}</span>
+                  <span className="text-xs text-slate-300">{formatDate(new Date(g.match_date))}</span>
                   {live && (
                     <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-red-400">
                       <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />Live
                     </span>
                   )}
-                  {finished && <span className="text-[10px] font-bold uppercase text-slate-500">Skončil</span>}
+                  {finished && <span className="text-[10px] font-bold uppercase text-slate-400">Skončil</span>}
                 </div>
                 <div className="flex items-center justify-center gap-3 mt-2">
                   <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                    <span className="font-semibold text-sm truncate">{g.home_team}</span>
+                    <span className="font-semibold text-sm text-white truncate">{g.home_team}</span>
                     <Flag code={g.home_code} />
                   </div>
-                  <span className="font-bold text-lg px-2 whitespace-nowrap">{score}</span>
+                  <span className="font-bold text-lg text-white px-2 whitespace-nowrap">{score}</span>
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Flag code={g.away_code} />
-                    <span className="font-semibold text-sm truncate">{g.away_team}</span>
+                    <span className="font-semibold text-sm text-white truncate">{g.away_team}</span>
                   </div>
                 </div>
               </div>
 
               {/* Seznam tipů */}
-              <div className="divide-y divide-slate-700/50">
+              <div className="divide-y divide-slate-800">
                 {g.tips.map(t => {
                   const isMe = user?.id === t.user_id;
                   const badge = pointsBadge(t, g.home_goals, g.away_goals);
                   return (
                     <div
                       key={t.user_id}
-                      className={`flex items-center justify-between px-4 py-2.5 ${isMe ? 'bg-blue-900/20' : ''}`}
+                      className={`flex items-center justify-between px-4 py-2.5 ${isMe ? 'bg-sky-400/10' : ''}`}
                     >
-                      <span className={`text-sm ${isMe ? 'text-blue-400 font-semibold' : 'text-slate-300'}`}>
-                        {t.username}{isMe && <span className="text-xs text-slate-500 ml-1">(ty)</span>}
+                      <span className={`text-sm ${isMe ? 'text-sky-300 font-semibold' : 'text-slate-200'}`}>
+                        {t.username}{isMe && <span className="text-xs text-slate-400 ml-1">(ty)</span>}
                       </span>
                       <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium text-slate-400 tabular-nums">
+                        <span className="text-sm font-medium text-slate-300 tabular-nums">
                           {t.pred_home}:{t.pred_away}
                         </span>
                         {finished && (
@@ -210,7 +210,7 @@ export default function Predictions() {
                   );
                 })}
                 {g.tips.length === 0 && (
-                  <p className="text-center text-xs text-slate-500 py-3">Nikdo netipoval</p>
+                  <p className="text-center text-xs text-slate-400 py-3">Nikdo netipoval</p>
                 )}
               </div>
             </div>

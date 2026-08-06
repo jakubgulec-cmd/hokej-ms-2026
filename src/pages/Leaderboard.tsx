@@ -49,40 +49,40 @@ export default function Leaderboard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Výsledky</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">Výsledky</h1>
 
-      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-700/60 text-slate-400 text-sm">
+            <tr className="bg-slate-950/40 text-slate-400 text-sm">
               <th className="px-5 py-3 text-left font-medium">#</th>
               <th className="px-5 py-3 text-left font-medium">Jméno</th>
               <th className="px-5 py-3 text-right font-medium">Tipy</th>
               <th className="px-5 py-3 text-right font-medium">Body</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700">
+          <tbody className="divide-y divide-slate-800">
             {rows.map((row, idx) => {
               const isMe = user?.id === row.id;
               return (
                 <tr
                   key={row.id}
-                  className={`transition ${isMe ? 'bg-blue-900/20' : 'hover:bg-slate-700/30'}`}
+                  className={`transition ${isMe ? 'bg-sky-400/10' : 'hover:bg-slate-800/50'}`}
                 >
                   <td className="px-5 py-4 text-lg">
-                    {idx < 3 ? MEDALS[idx] : <span className="text-slate-500 text-sm">#{idx + 1}</span>}
+                    {idx < 3 ? MEDALS[idx] : <span className="text-slate-400 text-sm">#{idx + 1}</span>}
                   </td>
                   <td className="px-5 py-4">
-                    <span className={isMe ? 'text-blue-400 font-semibold' : ''}>{row.username}</span>
-                    {isMe && <span className="text-xs text-slate-500 ml-2">(ty)</span>}
+                    <span className={isMe ? 'text-sky-300 font-semibold' : 'text-slate-100'}>{row.username}</span>
+                    {isMe && <span className="text-xs text-slate-400 ml-2">(ty)</span>}
                     {row.note && (
-                      <span className="text-xs text-slate-500 ml-2 italic">({row.note})</span>
+                      <span className="text-xs text-slate-400 ml-2 italic">({row.note})</span>
                     )}
                   </td>
                   <td className="px-5 py-4 text-right text-slate-400 text-sm">
                     {row.matches_predicted}
                   </td>
-                  <td className="px-5 py-4 text-right font-bold text-lg">
+                  <td className="px-5 py-4 text-right font-bold text-lg text-white">
                     {row.total_points}
                   </td>
                 </tr>
@@ -91,7 +91,7 @@ export default function Leaderboard() {
 
             {rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5 py-10 text-center text-slate-500">
+                <td colSpan={4} className="px-5 py-10 text-center text-slate-400">
                   Zatím žádné tipy
                 </td>
               </tr>
